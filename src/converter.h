@@ -4,7 +4,7 @@
 
 class RawAbstractConverter;
 
-using Converter = std::shared_ptr<RawAbstractConverter>;
+using Converter = std::unique_ptr<RawAbstractConverter>;
 
 class RawAbstractConverter{
 public:
