@@ -6,11 +6,26 @@ set(CMAKE_CXX_STANDARD 17)
 set(exe_name ${PROJECT_NAME})
 set(test_name Tests)
 
+include(FetchContent)
+FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/58d77fa8070e8cec2dc1ed015d66b454c8d78850.zip
+)
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+include(FetchContent)
+FetchContent_Declare(
+        argparse
+        URL https://github.com/p-ranav/argparse/archive/refs/tags/v2.9.zip
+)
+FetchContent_MakeAvailable(argparse)
+
 add_library(corelib OBJECT ${SOURCES} src/converter.cpp src/converters_factory.cpp)
 
 add_executable(${exe_name} src/main.cpp)
 
-target_link_libraries(${exe_name} corelib)
+target_link_libraries(${exe_name} corelib argparse)
 
 target_compile_options(corelib PUBLIC
         -Wall
@@ -31,14 +46,6 @@ target_compile_options(corelib PUBLIC
         -Wextra-semi # Redundant semicolon after in-class function definition
         -Wlogical-op # Suspicious uses of logical operators in expressions
         )
-
-include(FetchContent)
-FetchContent_Declare(
-        googletest
-        URL https://github.com/google/googletest/archive/58d77fa8070e8cec2dc1ed015d66b454c8d78850.zip
-)
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
 
 add_executable(${test_name} )
 target_link_libraries(${test_name} gtest_main)
