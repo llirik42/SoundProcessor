@@ -4,15 +4,23 @@
 
 using std::ifstream;
 
+// Every id is presented by 4 bytes in file
+const unsigned int ID_SIZE = 4;
 const uint32_t RIFF_ID = 1179011410;
 const uint32_t FMT_ID = 544501094;
 const uint32_t EXTRA_DATA_ID = 1414744396;
 const uint32_t DATA_ID = 1635017060;
-const uint32_t WAV_FORMAT = 1163280727;
-const unsigned int ID_SIZE = 4;
+
+const uint32_t SUPPORTED_RIFF_FORMAT = 1163280727;
+const uint32_t SUPPORTED_FMT_SUBCHUNK_SIZE = 16;
+const uint16_t SUPPORTED_FMT_AUDIO_FORMAT = 1;
+const uint16_t SUPPORTED_NUMBER_OF_CHANNELS = 1;
+const uint32_t SUPPORTED_SAMPLE_RATE = 44100;
+const uint32_t SUPPORTED_BYTE_RATE = 88200;
+const uint16_t SUPPORTED_BLOCK_ALIGN = 2;
+const uint16_t SUPPORTED_BITS_PER_SAMPLE = 16;
 
 #pragma pack(push, 1)
-
 struct RIFFChunk{ // RIFF
     uint32_t chunk_size; // File size - 8
     uint32_t format; // Must contain "WAVE" for .wav files
@@ -27,12 +35,7 @@ struct FMTSubchunk{ // fmt
     uint16_t block_align; // size of one block
     uint16_t bits_per_sample; // bits in one sample (depth). Program only supports 16 bits/sample
 };
-
 #pragma pack(pop)
-
-struct WAVFile::Impl{
-
-};
 
 size_t get_file_size(ifstream& ifstream){
     auto start_pos = ifstream.tellg();
@@ -54,10 +57,8 @@ bool is_file_empty(ifstream& ifstream){
 }
 
 void validate_riff_chunk(const RIFFChunk& riff_chunk, size_t file_size){
-    auto t = static_cast<size_t>(riff_chunk.chunk_size);
-
-    const bool check1 = t == file_size - 8;
-    const bool check2 = riff_chunk.format == WAV_FORMAT;
+    const bool check1 = static_cast<size_t>(riff_chunk.chunk_size) == file_size - 8;
+    const bool check2 = riff_chunk.format == SUPPORTED_RIFF_FORMAT;
 
     const bool is_valid = check1 && check2;
 
@@ -76,13 +77,13 @@ void read_riff_chunk(ifstream& ifstream){
 }
 
 void validate_fmt_subchunk(const FMTSubchunk& fmt_subchunk){
-    const bool check1 = fmt_subchunk.subchunk_size == 16;
-    const bool check2 = fmt_subchunk.audio_format == 1;
-    const bool check3 = fmt_subchunk.num_channels == 1;
-    const bool check4 = fmt_subchunk.sample_rate == 44100;
-    const bool check5 = fmt_subchunk.byte_rate == 88200;
-    const bool check6 = fmt_subchunk.block_align == 2;
-    const bool check7 = fmt_subchunk.bits_per_sample == 16;
+    const bool check1 = fmt_subchunk.subchunk_size == SUPPORTED_FMT_SUBCHUNK_SIZE;
+    const bool check2 = fmt_subchunk.audio_format == SUPPORTED_FMT_AUDIO_FORMAT;
+    const bool check3 = fmt_subchunk.num_channels == SUPPORTED_NUMBER_OF_CHANNELS;
+    const bool check4 = fmt_subchunk.sample_rate == SUPPORTED_SAMPLE_RATE;
+    const bool check5 = fmt_subchunk.byte_rate == SUPPORTED_BYTE_RATE;
+    const bool check6 = fmt_subchunk.block_align == SUPPORTED_BLOCK_ALIGN;
+    const bool check7 = fmt_subchunk.bits_per_sample == SUPPORTED_BITS_PER_SAMPLE;
 
     const bool is_valid = check1 && check2 && check3 && check4 && check5 && check6 && check7;
 
@@ -114,7 +115,7 @@ void read_data_subchunk(ifstream& ifstream){
 
     ifstream.read(reinterpret_cast<char*>(&data_subchunk_samples_count), sizeof(data_subchunk_samples_count));
 
-    data_subchunk_samples_count /= 2; // One sample = 2 bytes, but after it contains size in bytes
+    data_subchunk_samples_count /= 2; // One sample = 2 bytes and after reading it contains size in bytes
 
     for (unsigned int i = 0; i < data_subchunk_samples_count; i++){
         uint16_t sample;
@@ -123,8 +124,6 @@ void read_data_subchunk(ifstream& ifstream){
 }
 
 WAVFile::WAVFile(const std::string& file_path){
-    _pimpl = new Impl;
-
     ifstream ifstream(file_path, std::ios::binary);
 
     if (!ifstream.is_open() || is_file_empty(ifstream)){
@@ -178,8 +177,4 @@ WAVFile::WAVFile(const std::string& file_path){
         throw IncorrectWavError();
 
     }
-}
-
-WAVFile::~WAVFile(){
-    delete _pimpl;
 }
