@@ -56,9 +56,8 @@ int main(int argc, char** argv){
         std::cerr << exception.what() << '\n';
         return exception.code();
     }
-    catch (const std::runtime_error& err){ // incorrect args
+    catch (const std::runtime_error& err){ // Incorrect args
         std::cerr << err.what() << '\n';
-        std::cerr << program;
         return INCORRECT_ARGS_ERROR_CODE;
     }
     catch(...){ // Something bad happened ..
