@@ -1,0 +1,9 @@
+mute 30 ->
+mute 30 <-
+mute $1 30 ->
+mute $1 30 <-
+mute $2 30 ->
+mute $2 30 <-
+mute 0 30
+mute $1 0 30
+mute 21 0 30

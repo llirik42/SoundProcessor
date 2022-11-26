@@ -21,7 +21,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(argparse)
 
-add_library(corelib OBJECT ${SOURCES} src/converter.cpp src/converters_factory.cpp src/wav_file.cpp)
+add_library(corelib OBJECT ${SOURCES} src/converter.cpp src/converters_factory.cpp src/wav_file.cpp src/config_parser.cpp src/config_parser.h src/utils.cpp src/error_codes.h)
 
 add_executable(${exe_name} src/main.cpp)
 
@@ -47,6 +47,6 @@ target_compile_options(corelib PUBLIC
         -Wlogical-op # Suspicious uses of logical operators in expressions
         )
 
-add_executable(${test_name} tests/wav_tests.cpp)
+add_executable(${test_name} tests/wav_tests.cpp tests/config_parser_tests.cpp)
 target_link_libraries(${test_name} gtest_main)
 target_link_libraries(${test_name} corelib)

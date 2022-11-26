@@ -1,8 +1,6 @@
-#include <fstream>
-#include "exceptions.h"
 #include "wav_file.h"
-
-using std::ifstream;
+#include "exceptions.h"
+#include "utils.h"
 
 // Every id is presented by 4 bytes in file
 const unsigned int ID_SIZE = 4;
@@ -37,25 +35,6 @@ struct FMTSubchunk{ // fmt
 };
 #pragma pack(pop)
 
-size_t get_file_size(ifstream& ifstream){
-    auto start_pos = ifstream.tellg();
-
-    ifstream.seekg(0, std::fstream::end);
-
-    size_t result = static_cast<size_t>(ifstream.tellg());
-
-    if (ifstream.fail()){
-        throw IncorrectWavError();
-    }
-
-    ifstream.seekg(start_pos);
-
-    return result;
-}
-bool is_file_empty(ifstream& ifstream){
-    return !get_file_size(ifstream);
-}
-
 void validate_riff_chunk(const RIFFChunk& riff_chunk, size_t file_size){
     const bool check1 = static_cast<size_t>(riff_chunk.chunk_size) == file_size - 8;
     const bool check2 = riff_chunk.format == SUPPORTED_RIFF_FORMAT;
@@ -66,12 +45,12 @@ void validate_riff_chunk(const RIFFChunk& riff_chunk, size_t file_size){
         throw IncorrectWavError();
     }
 }
-void read_riff_chunk(ifstream& ifstream){
+void read_riff_chunk(std::ifstream& wav_file){
     RIFFChunk riff_chunk{};
 
-    ifstream.read(reinterpret_cast<char*>(&riff_chunk), sizeof(riff_chunk));
+    wav_file.read(reinterpret_cast<char*>(&riff_chunk), sizeof(riff_chunk));
 
-    size_t file_size = get_file_size(ifstream);
+    size_t file_size = get_file_size(wav_file);
 
     validate_riff_chunk(riff_chunk, file_size);
 }
@@ -91,42 +70,42 @@ void validate_fmt_subchunk(const FMTSubchunk& fmt_subchunk){
         throw IncorrectWavError();
     }
 }
-void read_fmt_subchunk(ifstream& ifstream){
+void read_fmt_subchunk(std::ifstream& wav_file){
     FMTSubchunk fmt_subchunk{};
 
-    ifstream.read(reinterpret_cast<char*>(&fmt_subchunk), sizeof(fmt_subchunk));
+    wav_file.read(reinterpret_cast<char*>(&fmt_subchunk), sizeof(fmt_subchunk));
 
     validate_fmt_subchunk(fmt_subchunk);
 }
 
-void read_list_subchunk(ifstream& ifstream){
+void read_extra_data_subchunk(std::ifstream& wav_file){
     uint32_t subchunk_size;
 
-    ifstream.read(reinterpret_cast<char*>(&subchunk_size), sizeof(subchunk_size));
+    wav_file.read(reinterpret_cast<char*>(&subchunk_size), sizeof(subchunk_size));
 
     auto buffer = new char[subchunk_size];
 
-    ifstream.read(buffer, subchunk_size);
+    wav_file.read(buffer, subchunk_size);
 
     delete[] buffer;
 }
-void read_data_subchunk(ifstream& ifstream){
+void read_data_subchunk(std::ifstream& wav_file){
     uint32_t data_subchunk_samples_count;
 
-    ifstream.read(reinterpret_cast<char*>(&data_subchunk_samples_count), sizeof(data_subchunk_samples_count));
+    wav_file.read(reinterpret_cast<char*>(&data_subchunk_samples_count), sizeof(data_subchunk_samples_count));
 
     data_subchunk_samples_count /= 2; // One sample = 2 bytes and after reading it contains size in bytes
 
     for (unsigned int i = 0; i < data_subchunk_samples_count; i++){
         uint16_t sample;
-        ifstream.read(reinterpret_cast<char*>(&sample), sizeof(sample));
+        wav_file.read(reinterpret_cast<char*>(&sample), sizeof(sample));
     }
 }
 
 WAVFile::WAVFile(const std::string& file_path){
-    ifstream ifstream(file_path, std::ios::binary);
+    std::ifstream wav_file(file_path, std::ios::binary);
 
-    if (!ifstream.is_open() || is_file_empty(ifstream)){
+    if (!wav_file.is_open() || is_file_empty(wav_file)){
         throw IncorrectWavError();
     }
 
@@ -136,7 +115,7 @@ WAVFile::WAVFile(const std::string& file_path){
     bool met_extra_data = false;
 
     uint32_t current_id;
-    while (ifstream.read(reinterpret_cast<char*>(&current_id), ID_SIZE) && ifstream){
+    while (wav_file.read(reinterpret_cast<char*>(&current_id), ID_SIZE) && wav_file){
         const bool incorrect_order_of_chunks = current_id != RIFF_ID && !met_riff;
         if (incorrect_order_of_chunks){
             throw IncorrectWavError();
@@ -154,26 +133,26 @@ WAVFile::WAVFile(const std::string& file_path){
         switch (current_id){
             case RIFF_ID:
                 met_riff = true;
-                read_riff_chunk(ifstream);
+                read_riff_chunk(wav_file);
                 break;
             case FMT_ID:
                 met_fmt = true;
-                read_fmt_subchunk(ifstream);
+                read_fmt_subchunk(wav_file);
                 break;
             case EXTRA_DATA_ID:
                 met_extra_data = true;
-                read_list_subchunk(ifstream);
+                read_extra_data_subchunk(wav_file);
                 break;
             case DATA_ID:
                 met_data = true;
-                read_data_subchunk(ifstream);
+                read_data_subchunk(wav_file);
                 break;
             default:
                 throw IncorrectWavError();
         }
     }
 
-    if (!ifstream.eof()){
+    if (!wav_file.eof()){
         throw IncorrectWavError();
 
     }
