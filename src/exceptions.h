@@ -17,6 +17,14 @@ public:
 
 class IncorrectConfigError : public AbstractException{
 public:
-    [[nodiscard]] const char* what() const noexcept override {return "Incorrect config file";}
+    [[nodiscard]] const char* what() const noexcept override {return "Incorrect config file (either path is incorrect or file couldn't be opened)";}
     [[nodiscard]] int code() const noexcept override {return INCORRECT_CONFIG_ERROR_CODE;}
 };
+
+
+class UnknownCommandError : public AbstractException{
+public:
+    [[nodiscard]] const char* what() const noexcept override {return "Unknown command";}
+    [[nodiscard]] int code() const noexcept override {return UNKNOWN_COMMAND_ERROR_CODE;}
+};
+

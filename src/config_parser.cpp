@@ -22,21 +22,14 @@ Command extract_command(std::string& command_string){
 
     Command result;
 
-    bool met_something = false;
-
     if (!isspace(command_string.back())){
         command_string.push_back(' ');
     }
 
     size_t pos;
     while ((pos = command_string.find(delimiter)) != std::string::npos){
-        met_something = true;
         result.command_args.push_back(command_string.substr(0, pos));
         command_string.erase(0, pos + delimiter.length());
-    }
-
-    if (!met_something){
-        throw IncorrectConfigError();
     }
 
     result.command_name = result.command_args.front();

@@ -24,6 +24,9 @@ FetchContent_MakeAvailable(argparse)
 add_library(corelib OBJECT
         src/converters/mix_converter.cpp
         src/converters/mute_converter.cpp
+        src/converters/volume_converter.cpp
+        src/converters/cut_converter.cpp
+        src/converters/insert_converter.cpp
         src/config_parser.cpp
         src/converters_factory.cpp
         src/processor.cpp

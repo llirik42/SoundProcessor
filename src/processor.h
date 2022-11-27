@@ -15,10 +15,11 @@ public:
             const std::vector<string>& additional_files,
             const ConvertersFactory& factory
             );
-    void Process();
+    void process() const;
 
     ~Processor();
 private:
     struct Imple;
+
     Imple* _pimple;
 };

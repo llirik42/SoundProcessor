@@ -2,17 +2,19 @@
 
 #include <string>
 #include <map>
+#include <utility>
 #include "converters/all_converters.h"
 
-using ConvertersInfo = std::map<std::string, std::string>;
+// Key - converter, pair - contains description and vector of commands
+using ConvertersInfo = std::map<std::string, std::pair<std::string, std::vector<std::string>>>;
 
 class ConvertersFactory{
 public:
     ConvertersFactory();
 
-    Converter CreateConverter(const std::string& converter_name);
+    [[nodiscard]] Converter create_converter(const std::string& command_name) const;
 
-    const ConvertersInfo& GetConvertersInfo();
+    [[nodiscard]] const ConvertersInfo& get_converters_info() const;
 
     ~ConvertersFactory();
 private:

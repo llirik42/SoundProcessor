@@ -17,8 +17,10 @@ std::string get_program_description(const ConvertersInfo& converters_info){
                                       "Converters:\n";
 
     const unsigned int default_padding = 22;
-    for (const auto& [name, description] : converters_info){
+    for (const auto& [name, description_commands] : converters_info){
         const auto length = name.length();
+
+        const auto& [description, _] = description_commands;
 
         program_description.append("  ");
         program_description.append(name);
@@ -32,7 +34,7 @@ std::string get_program_description(const ConvertersInfo& converters_info){
 int main(int argc, char** argv){
     ConvertersFactory factory;
 
-    ConvertersInfo converters_info = factory.GetConvertersInfo();
+    const ConvertersInfo& converters_info = factory.get_converters_info();
 
     std::string program_description = get_program_description(converters_info);
 
@@ -65,7 +67,7 @@ int main(int argc, char** argv){
 
         Processor processor(config_path, output_file, input_file, additional_files, factory);
 
-        processor.Process();
+        processor.process();
     }
     catch(const AbstractException& exception){
         std::cerr << exception.what() << '\n';
