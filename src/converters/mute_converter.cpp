@@ -38,16 +38,32 @@ void RawMuteConverter::convert(const ConverterParams& params) const{
     if (params.size() == 4){
         try{
             if (params[2] != "<-"){
-                start_s = static_cast<size_t>(std::stoi(params[2]));
+                int tmp = std::stoi(params[2]);
+
+                if (tmp < 0){
+                    throw IncorrectCommandsParams();
+                }
+
+                start_s = static_cast<size_t>(tmp);
             }
 
             if (params[3] != "->"){
-                stop_s = static_cast<size_t>(std::stoi(params[3]));
+                int tmp = std::stoi(params[3]);
+
+                if (tmp < 0){
+                    throw IncorrectCommandsParams();
+                }
+
+                stop_s = static_cast<size_t>(tmp);
             }
         }
         catch(...){
             throw IncorrectCommandsParams();
         }
+    }
+
+    if (start_s >= stop_s || stop_s >= input_file.get_duration_s()){
+        throw IncorrectCommandsParams();
     }
 
     mute(output_file, input_file, start_s * SUPPORTED_SAMPLE_RATE, stop_s * SUPPORTED_SAMPLE_RATE);
