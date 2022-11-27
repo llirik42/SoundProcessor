@@ -4,7 +4,7 @@
 
 class RawCutConverter : public RawAbstractConverter{
 public:
-    void convert(const ConverterParams& params) const override;
+    void convert(const std::string& command, const ConverterParams& params) const override;
 
     ~RawCutConverter() override = default;
 };

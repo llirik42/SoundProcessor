@@ -133,7 +133,7 @@ void Processor::process() const{
         params.insert(params.begin(), path_of_tmp1);
         params.insert(params.begin(), path_of_tmp2);
 
-        _pimple->find_converter_by_single_command(command_name)->convert(params);
+        _pimple->find_converter_by_single_command(command_name)->convert(command_name, params);
 
         path_of_final_output = path_of_tmp2;
 

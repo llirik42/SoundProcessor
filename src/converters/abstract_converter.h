@@ -13,7 +13,7 @@ using ConverterParams = std::vector<std::string>; // "Param" -> value of param
 
 class RawAbstractConverter{
 public:
-    virtual void convert(const ConverterParams& params) const = 0;
+    virtual void convert(const std::string& command, const ConverterParams& params) const = 0;
 
     virtual ~RawAbstractConverter() = default;
 };

@@ -17,7 +17,7 @@ void mute(std::ofstream& output, WAVFile& input, size_t start_sample, size_t sto
     }
 }
 
-void RawMuteConverter::convert(const ConverterParams& params) const{
+void RawMuteConverter::convert([[maybe_unused]] const std::string& command, const ConverterParams& params) const{
     if (params.size() != 2 && params.size() != 4){
         throw IncorrectCommandsParams();
     }
@@ -62,7 +62,7 @@ void RawMuteConverter::convert(const ConverterParams& params) const{
         }
     }
 
-    if (start_s >= stop_s || stop_s >= input_file.get_duration_s()){
+    if (start_s >= stop_s || stop_s > input_file.get_duration_s()){
         throw IncorrectCommandsParams();
     }
 
