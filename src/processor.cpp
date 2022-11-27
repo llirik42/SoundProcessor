@@ -3,7 +3,6 @@
 #include "exceptions.h"
 #include "utils.h"
 #include "processor.h"
-#include "wav_file.h"
 #include "config_parser.h"
 
 // {Commands of converter} -> converter
@@ -24,9 +23,9 @@ ConvertersMap create_converters_map(const ConvertersInfo& converters_info){
 struct Processor::Imple{
     std::string output_file_path;
 
-    WAVFile input_file;
+    std::string input_file_path;
 
-    std::vector<WAVFile> additional_files;
+    std::vector<std::string> additional_files_paths;
 
     ConfigParser config_parser;
 
@@ -73,6 +72,28 @@ struct Processor::Imple{
         // and was thrown away while preparing converters
         return converters_map[{}];
     }
+
+    void replace_params(ConverterParams& params){
+        for (auto& param : params){
+            if (param[0] == '$'){
+                try{
+                    auto file_index = static_cast<size_t>(strtoul(param.c_str() + 1, nullptr, 10));
+
+                    if (file_index == 0 || file_index > additional_files_paths.size()){
+                        throw IncorrectCommandsParams();
+                    }
+
+                    param = additional_files_paths[file_index - 1];
+                }
+                catch(...){
+                    throw IncorrectCommandsParams();
+                }
+
+
+
+            }
+        }
+    }
 };
 
 Processor::Processor(const string& config,
@@ -81,15 +102,10 @@ Processor::Processor(const string& config,
                      const std::vector<string>& additional_files,
                      const ConvertersFactory& factory){
 
-    std::vector<WAVFile> additional_wav_files;
-    for (const auto& path : additional_files){
-        additional_wav_files.emplace_back(path);
-    }
-
     _pimple = new Imple{
         out,
-        WAVFile(in),
-        additional_wav_files,
+        in,
+        additional_files,
         ConfigParser(config),
         factory,
         {},
@@ -99,8 +115,39 @@ Processor::Processor(const string& config,
 }
 
 void Processor::process() const{
+    std::string path_of_tmp1 = "tmp1.wav";
+    std::string path_of_tmp2 = "tmp2.wav";
+
+    copy_file(path_of_tmp1, _pimple->input_file_path);
+
+    std::string path_of_final_output = path_of_tmp2;
+
     for (const auto& [command_name, command_args] : _pimple->config_parser){
-        _pimple->find_converter_by_single_command(command_name)->convert();
+        ConverterParams params;
+
+        std::copy(command_args.begin(), command_args.end(),
+                  std::back_inserter(params));
+
+        _pimple->replace_params(params);
+
+        params.insert(params.begin(), path_of_tmp1);
+        params.insert(params.begin(), path_of_tmp2);
+
+        _pimple->find_converter_by_single_command(command_name)->convert(params);
+
+        path_of_final_output = path_of_tmp2;
+
+        std::swap(path_of_tmp1, path_of_tmp2);
+    }
+
+    copy_file(_pimple->output_file_path, path_of_final_output);
+
+    try{
+        std::remove(path_of_tmp1.c_str());
+        std::remove(path_of_tmp2.c_str());
+    }
+    catch(...){
+        throw IOError();
     }
 }
 

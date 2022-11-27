@@ -45,7 +45,7 @@ ConvertersFactory::ConvertersFactory(){
     _pimple->converters_full_info["cut_converter"] = {
             "Description 4",
             create<RawCutConverter>,
-            {"cut"}
+            {"cut", "extract"}
     };
 
     _pimple->converters_full_info["insert_converter"] = {

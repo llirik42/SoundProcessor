@@ -2,6 +2,6 @@
 
 #include <iostream>
 
-void RawCutConverter::convert() const{
+void RawCutConverter::convert([[maybe_unused]] const ConverterParams& params) const{
     std::cout << "Cutter!\n";
 }

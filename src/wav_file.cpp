@@ -1,22 +1,10 @@
+#include <memory>
 #include "wav_file.h"
 #include "exceptions.h"
 #include "utils.h"
+#include "wav_format_info.h"
 
-// Every id is presented by 4 bytes in file
-const unsigned int ID_SIZE = 4;
-const uint32_t RIFF_ID = 1179011410;
-const uint32_t FMT_ID = 544501094;
-const uint32_t EXTRA_DATA_ID = 1414744396;
-const uint32_t DATA_ID = 1635017060;
-
-const uint32_t SUPPORTED_RIFF_FORMAT = 1163280727;
-const uint32_t SUPPORTED_FMT_SUBCHUNK_SIZE = 16;
-const uint16_t SUPPORTED_FMT_AUDIO_FORMAT = 1;
-const uint16_t SUPPORTED_NUMBER_OF_CHANNELS = 1;
-const uint32_t SUPPORTED_SAMPLE_RATE = 44100;
-const uint32_t SUPPORTED_BYTE_RATE = 88200;
-const uint16_t SUPPORTED_BLOCK_ALIGN = 2;
-const uint16_t SUPPORTED_BITS_PER_SAMPLE = 16;
+const size_t BUFFER_SIZE = 1024; // In samples (not in bytes)
 
 #pragma pack(push, 1)
 struct RIFFChunk{ // RIFF
@@ -34,6 +22,22 @@ struct FMTSubchunk{ // fmt
     uint16_t bits_per_sample; // bits in one sample (depth). Program only supports 16 bits/sample
 };
 #pragma pack(pop)
+
+struct WAVFile::Imple{
+    std::ifstream file;
+
+    size_t duration_s;
+
+    size_t samples_count;
+
+    Sample buffer[BUFFER_SIZE];
+
+    size_t index_in_buffer;
+
+    void read_to_buffer(){
+        file.read(reinterpret_cast<char*>(&buffer), sizeof(buffer));
+    }
+};
 
 void validate_riff_chunk(const RIFFChunk& riff_chunk, size_t file_size){
     const bool check1 = static_cast<size_t>(riff_chunk.chunk_size) == file_size - 8;
@@ -89,12 +93,15 @@ void read_extra_data_subchunk(std::ifstream& wav_file){
 
     delete[] buffer;
 }
-void read_data_subchunk(std::ifstream& wav_file){
+void read_data_subchunk(std::ifstream& wav_file, fpos_t& data_start_position, size_t& samples_count){
     uint32_t data_subchunk_samples_count;
 
     wav_file.read(reinterpret_cast<char*>(&data_subchunk_samples_count), sizeof(data_subchunk_samples_count));
 
     data_subchunk_samples_count /= 2; // One sample = 2 bytes and after reading it contains size in bytes
+
+    data_start_position = wav_file.tellg();
+    samples_count = data_subchunk_samples_count;
 
     for (unsigned int i = 0; i < data_subchunk_samples_count; i++){
         uint16_t sample;
@@ -103,6 +110,9 @@ void read_data_subchunk(std::ifstream& wav_file){
 }
 
 WAVFile::WAVFile(const std::string& file_path){
+    fpos_t data_start_position;
+    size_t samples_count;
+
     std::ifstream wav_file(file_path, std::ios::binary);
 
     if (!wav_file.is_open() || is_file_empty(wav_file)){
@@ -145,15 +155,54 @@ WAVFile::WAVFile(const std::string& file_path){
                 break;
             case DATA_ID:
                 met_data = true;
-                read_data_subchunk(wav_file);
+                read_data_subchunk(wav_file, data_start_position, samples_count);
                 break;
             default:
                 throw IncorrectWavError();
         }
     }
 
+    // Error occurred while reading file
     if (!wav_file.eof()){
         throw IncorrectWavError();
-
     }
+
+    wav_file.clear();
+
+    wav_file.seekg(0);
+
+    _pimple = new Imple{
+        std::move(wav_file),
+        samples_count / SUPPORTED_SAMPLE_RATE,
+        samples_count,
+        {},
+        0
+    };
+
+    _pimple->read_to_buffer();
 }
+
+size_t WAVFile::get_duration_s() const{
+    return _pimple->duration_s;
+}
+
+Sample WAVFile::get_sample() const{
+    Sample result = _pimple->buffer[_pimple->index_in_buffer++];
+
+    if (_pimple->index_in_buffer == BUFFER_SIZE){
+        _pimple->index_in_buffer = 0;
+
+        _pimple->read_to_buffer();
+    }
+
+    return result;
+}
+
+size_t WAVFile::get_samples_count() const{
+    return _pimple->samples_count;
+}
+
+WAVFile::~WAVFile(){
+    delete _pimple;
+}
+

@@ -2,6 +2,6 @@
 
 #include <iostream>
 
-void RawVolumeConverter::convert() const{
+void RawVolumeConverter::convert([[maybe_unused]]const ConverterParams& params) const{
     std::cout << "Volume converter\n";
 }
