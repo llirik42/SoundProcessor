@@ -3,14 +3,14 @@
 #include "../wav_format_info.h"
 #include "volume_converter.h"
 
-void convert_volume(std::ofstream& output, WAVFile& input, float coefficient, size_t start_sample, size_t stop_sample){
+void convert_volume(std::ofstream& output, WAVFile& input, float volume_coefficient, size_t start_sample, size_t stop_sample){
     write_default_wav_headers(output, input.get_samples_count());
 
     for (size_t i = 0; i < input.get_samples_count(); i++){
         Sample sample = input.get_sample();
 
-        if (i >= start_sample && i <= stop_sample){
-            sample = static_cast<Sample>(static_cast<float>(sample) * coefficient);
+        if (start_sample <= i && i <= stop_sample){
+            sample = static_cast<Sample>(static_cast<float>(sample) * volume_coefficient);
         }
 
         write_sample(output, sample);
@@ -18,47 +18,50 @@ void convert_volume(std::ofstream& output, WAVFile& input, float coefficient, si
 }
 
 void RawVolumeConverter::convert([[maybe_unused]] const std::string& command, [[maybe_unused]] const ConverterParams& params) const{
-    if (params.size() != 3 && params.size() != 5){
+    ConverterParams new_params = params;
+
+    if (command == "mute"){
+        new_params.insert(new_params.begin() + 2, "0");
+    }
+
+    if (new_params.size() != 3 && new_params.size() != 5){
         throw IncorrectCommandsParams();
     }
 
-    const std::string& output_path = params[0];
-
-    std::ofstream output_file(output_path, std::fstream::binary);
-
+    std::ofstream output_file(new_params[0], std::fstream::binary);
     if (!output_file.is_open()){
         throw IOError();
     }
 
-    WAVFile input_file(params[1]);
+    WAVFile input_file(new_params[1]);
 
-    size_t start_s = 0;
-    size_t stop_s = input_file.get_duration_s();
+    size_t start_seconds = 0;
+    size_t stop_seconds = input_file.get_duration_s();
 
     float volume_coefficient;
 
     try{
-        volume_coefficient = std::stof(params[2]);
+        volume_coefficient = std::stof(new_params[2]);
 
-        if (params.size() == 5){
-            if (params[3] != "<-"){
-                int tmp = std::stoi(params[3]);
+        if (new_params.size() == 5){
+            if (new_params[3] != "<-"){
+                int tmp = std::stoi(new_params[3]);
 
                 if (tmp < 0){
                     throw IncorrectCommandsParams();
                 }
 
-                start_s = static_cast<size_t>(tmp);
+                start_seconds = static_cast<size_t>(tmp);
             }
 
-            if (params[4] != "->"){
-                int tmp = std::stoi(params[4]);
+            if (new_params[4] != "->"){
+                int tmp = std::stoi(new_params[4]);
 
                 if (tmp < 0){
                     throw IncorrectCommandsParams();
                 }
 
-                stop_s = static_cast<size_t>(tmp);
+                stop_seconds = static_cast<size_t>(tmp);
             }
         }
     }
@@ -66,10 +69,15 @@ void RawVolumeConverter::convert([[maybe_unused]] const std::string& command, [[
         throw IncorrectCommandsParams();
     }
 
-
-    if (volume_coefficient < 0 || start_s >= stop_s || stop_s > input_file.get_duration_s()){
+    if (volume_coefficient < 0 || start_seconds >= stop_seconds || stop_seconds > input_file.get_duration_s()){
         throw IncorrectCommandsParams();
     }
 
-    convert_volume(output_file, input_file, volume_coefficient, start_s * SUPPORTED_SAMPLE_RATE, stop_s * SUPPORTED_SAMPLE_RATE);
+    convert_volume(
+            output_file,
+            input_file,
+            volume_coefficient,
+            start_seconds * SUPPORTED_SAMPLE_RATE,
+            stop_seconds * SUPPORTED_SAMPLE_RATE
+            );
 }

@@ -24,12 +24,6 @@ Converter create(){
 ConvertersFactory::ConvertersFactory(){
     _pimple = new Imple;
 
-    _pimple->converters_full_info["mute_converter"] = {
-            "Description 1",
-            create<RawMuteConverter>,
-            {"mute"}
-    };
-
     _pimple->converters_full_info["mix_converter"] = {
             "Description 2",
             create<RawMixConverter>,
@@ -39,7 +33,7 @@ ConvertersFactory::ConvertersFactory(){
     _pimple->converters_full_info["volume_converter"] = {
             "Description 3",
             create<RawVolumeConverter>,
-            {"volume"}
+            {"volume", "mute"}
     };
 
     _pimple->converters_full_info["cut_converter"] = {
