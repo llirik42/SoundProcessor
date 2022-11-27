@@ -6,9 +6,10 @@
 #include "wav_file.h"
 #include "config_parser.h"
 
-// Commands of converter -> converter
+// {Commands of converter} -> converter
 using ConvertersMap = std::map<std::vector<std::string>, Converter>;
 
+// Creates map where every converter will be nullptr
 ConvertersMap create_converters_map(const ConvertersInfo& converters_info){
     ConvertersMap result;
 
@@ -33,6 +34,7 @@ struct Processor::Imple{
 
     ConvertersMap converters_map;
 
+    // fill map of converters according to config (create only needed converters)
     void prepare_converters(){
         const ConvertersInfo& converters_info = factory.get_converters_info();
 
@@ -53,6 +55,7 @@ struct Processor::Imple{
                 }
             }
 
+            // Met unknown command
             if (!found_converter){
                 throw UnknownCommandError();
             }

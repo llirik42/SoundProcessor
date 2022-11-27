@@ -68,6 +68,7 @@ Converter ConvertersFactory::create_converter(const std::string& command_name) c
         }
     }
 
+    // Actually, it cannot happen because of the code before this creation)
     throw IncorrectConfigError();
 }
 
