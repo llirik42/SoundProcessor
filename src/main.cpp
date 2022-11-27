@@ -1,19 +1,43 @@
 #include <vector>
+#include <string>
 #include <argparse/argparse.hpp>
 #include "error_codes.h"
 #include "exceptions.h"
-#include "wav_file.h"
-#include "config_parser.h"
+#include "converters_factory.h"
+#include "processor.h"
+
+std::string get_program_description(const ConvertersInfo& converters_info){
+    std::string program_description = "The program performs audio conversions specified in the config "
+                                      "file and saves result to an output file.\n\n"
+                                      "Supports only WAV files with:\n"
+                                      "  audio-format - PCM (without encoding)\n"
+                                      "  1 channel (mono)\n"
+                                      "  bit depth - signed 16 bit (little endian)\n"
+                                      "  sample rate - 44100 Hz\n\n"
+                                      "Converters:\n";
+
+    const unsigned int default_padding = 22;
+    for (const auto& [name, description] : converters_info){
+        const auto length = name.length();
+
+        program_description.append("  ");
+        program_description.append(name);
+        program_description.append(default_padding - length, ' ');
+        program_description.append(description);
+        program_description.append(1, '\n');
+    }
+    return program_description;
+}
 
 int main(int argc, char** argv){
+    ConvertersFactory factory;
+
+    ConvertersInfo converters_info = factory.GetConvertersInfo();
+
+    std::string program_description = get_program_description(converters_info);
+
     argparse::ArgumentParser program("SoundProcessor");
-    program.add_description("The program performs audio conversions specified in the config "
-                            "file and saves result to an output file.\n"
-                            "Supports only WAV files with: "
-                            "audio-format - PCM (without encoding), "
-                            "1 channel (mono), "
-                            "bit depth - signed 16 bit (little endian), "
-                            "sample rate - 44100 Hz");
+    program.add_description(program_description);
 
     program.add_argument("output_file")
             .help("The output file")
@@ -23,8 +47,8 @@ int main(int argc, char** argv){
             .help("The input file")
             .required();
 
-    program.add_argument("auxiliary_files")
-            .help("auxiliary_files")
+    program.add_argument("additional_files")
+            .help("Additional files")
             .nargs(argparse::nargs_pattern::any);
 
     program.add_argument("-c", "--config")
@@ -34,23 +58,14 @@ int main(int argc, char** argv){
     try {
         program.parse_args(argc, argv);
 
-        auto config_file_path = program.get<std::string>("-c");
-        auto output_file_path = program.get<std::string>("output_file");
-        auto input_file_path = program.get<std::string>("input_file");
-        auto auxiliary_files_paths = program.get<std::vector<std::string>>("auxiliary_files");
+        auto config_path = program.get<std::string>("-c");
+        auto output_file = program.get<std::string>("output_file");
+        auto input_file = program.get<std::string>("input_file");
+        auto additional_files = program.get<std::vector<std::string>>("additional_files");
 
-        WAVFile input_file(input_file_path);
+        Processor processor(config_path, output_file, input_file, additional_files, factory);
 
-        std::vector<WAVFile> auxiliary_files;
-        for (const auto& path : auxiliary_files_paths){
-            auxiliary_files.emplace_back(path);
-        }
-
-        ConfigParser config_parser(config_file_path);
-
-        for (const auto& command : config_parser){
-            std::cout << command.command_name << '\n';
-        }
+        processor.Process();
     }
     catch(const AbstractException& exception){
         std::cerr << exception.what() << '\n';

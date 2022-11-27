@@ -21,7 +21,15 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(argparse)
 
-add_library(corelib OBJECT ${SOURCES} src/converter.cpp src/converters_factory.cpp src/wav_file.cpp src/config_parser.cpp src/config_parser.h src/utils.cpp src/error_codes.h)
+add_library(corelib OBJECT
+        src/converters/mix_converter.cpp
+        src/converters/mute_converter.cpp
+        src/config_parser.cpp
+        src/converters_factory.cpp
+        src/processor.cpp
+        src/utils.cpp
+        src/wav_file.cpp
+        )
 
 add_executable(${exe_name} src/main.cpp)
 

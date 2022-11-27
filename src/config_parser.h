@@ -4,13 +4,9 @@
 #include <string>
 #include <limits>
 
-using Time = unsigned int; // Presents time in a .wav files
-const Time BEFORE_TIME = std::numeric_limits<Time>::max() - 1; // <-
-const Time AFTER_TIME = std::numeric_limits<Time>::max(); // ->
-
 struct Command{
     std::string command_name;
-    std::vector<unsigned int> command_args;
+    std::vector<std::string> command_args;
 };
 
 class ConfigParser{
@@ -22,6 +18,9 @@ public:
     [[nodiscard]] ConfigParserIterator begin() const;
 
     [[nodiscard]] ConfigParserIterator end() const;
+
+    ~ConfigParser();
 private:
-    std::vector<Command> _commands;
+    struct Imple;
+    Imple* _pimple;
 };
