@@ -20,7 +20,7 @@ ConvertersMap create_converters_map(const ConvertersInfo& converters_info){
     return result;
 }
 
-struct Processor::Imple{
+struct Processor::Impl{
     std::string output_file_path;
 
     std::string input_file_path;
@@ -88,9 +88,6 @@ struct Processor::Imple{
                 catch(...){
                     throw IncorrectCommandsParams();
                 }
-
-
-
             }
         }
     }
@@ -102,7 +99,7 @@ Processor::Processor(const string& config,
                      const std::vector<string>& additional_files,
                      const ConvertersFactory& factory){
 
-    _pimple = new Imple{
+    _pimpl = new Impl{
         out,
         in,
         additional_files,
@@ -111,36 +108,36 @@ Processor::Processor(const string& config,
         {},
     };
 
-    _pimple->prepare_converters();
+    _pimpl->prepare_converters();
 }
 
 void Processor::process() const{
     std::string path_of_tmp1 = "tmp1.wav";
     std::string path_of_tmp2 = "tmp2.wav";
 
-    copy_file(path_of_tmp1, _pimple->input_file_path);
+    copy_file(path_of_tmp1, _pimpl->input_file_path);
 
     std::string path_of_final_output = path_of_tmp2;
 
-    for (const auto& [command_name, command_args] : _pimple->config_parser){
+    for (const auto& [command_name, command_args] : _pimpl->config_parser){
         ConverterParams params;
 
         std::copy(command_args.begin(), command_args.end(),
                   std::back_inserter(params));
 
-        _pimple->replace_params(params);
+        _pimpl->replace_params(params);
 
         params.insert(params.begin(), path_of_tmp1);
         params.insert(params.begin(), path_of_tmp2);
 
-        _pimple->find_converter_by_single_command(command_name)->convert(command_name, params);
+        _pimpl->find_converter_by_single_command(command_name)->convert(command_name, params);
 
         path_of_final_output = path_of_tmp2;
 
         std::swap(path_of_tmp1, path_of_tmp2);
     }
 
-    copy_file(_pimple->output_file_path, path_of_final_output);
+    copy_file(_pimpl->output_file_path, path_of_final_output);
 
     try{
         std::remove(path_of_tmp1.c_str());
@@ -152,5 +149,5 @@ void Processor::process() const{
 }
 
 Processor::~Processor(){
-    delete _pimple;
+    delete _pimpl;
 }

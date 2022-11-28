@@ -23,7 +23,7 @@ struct FMTSubchunk{ // fmt
 };
 #pragma pack(pop)
 
-struct WAVFile::Imple{
+struct WAVFile::Impl{
     std::ifstream file;
 
     size_t duration_s;
@@ -171,7 +171,7 @@ WAVFile::WAVFile(const std::string& file_path){
 
     wav_file.seekg(0);
 
-    _pimple = new Imple{
+    _pimpl = new Impl{
         std::move(wav_file),
         samples_count / SUPPORTED_SAMPLE_RATE,
         samples_count,
@@ -179,30 +179,30 @@ WAVFile::WAVFile(const std::string& file_path){
         0
     };
 
-    _pimple->read_to_buffer();
+    _pimpl->read_to_buffer();
 }
 
 size_t WAVFile::get_duration_s() const{
-    return _pimple->duration_s;
+    return _pimpl->duration_s;
 }
 
 Sample WAVFile::get_sample() const{
-    Sample result = _pimple->buffer[_pimple->index_in_buffer++];
+    Sample result = _pimpl->buffer[_pimpl->index_in_buffer++];
 
-    if (_pimple->index_in_buffer == BUFFER_SIZE){
-        _pimple->index_in_buffer = 0;
+    if (_pimpl->index_in_buffer == BUFFER_SIZE){
+        _pimpl->index_in_buffer = 0;
 
-        _pimple->read_to_buffer();
+        _pimpl->read_to_buffer();
     }
 
     return result;
 }
 
 size_t WAVFile::get_samples_count() const{
-    return _pimple->samples_count;
+    return _pimpl->samples_count;
 }
 
 WAVFile::~WAVFile(){
-    delete _pimple;
+    delete _pimpl;
 }
 

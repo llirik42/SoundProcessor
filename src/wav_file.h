@@ -13,6 +13,6 @@ public:
 
     ~WAVFile();
 private:
-    struct Imple;
-    Imple* _pimple;
+    struct Impl;
+    Impl* _pimpl;
 };

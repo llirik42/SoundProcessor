@@ -18,6 +18,6 @@ public:
 
     ~ConvertersFactory();
 private:
-    struct Imple;
-    Imple* _pimple;
+    struct Impl;
+    Impl* _pimpl;
 };

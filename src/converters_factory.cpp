@@ -4,7 +4,7 @@
 #include "exceptions.h"
 #include "converters_factory.h"
 
-struct ConvertersFactory::Imple{
+struct ConvertersFactory::Impl{
     struct SingleConverterData{
         std::string description;
         std::function<Converter(void)> create;
@@ -22,39 +22,39 @@ Converter create(){
 }
 
 ConvertersFactory::ConvertersFactory(){
-    _pimple = new Imple;
+    _pimpl = new Impl;
 
-    _pimple->converters_full_info["mix_converter"] = {
+    _pimpl->converters_full_info["mix_converter"] = {
             "Description 2",
             create<RawMixConverter>,
             {"mix"}
     };
 
-    _pimple->converters_full_info["volume_converter"] = {
+    _pimpl->converters_full_info["volume_converter"] = {
             "Description 3",
             create<RawVolumeConverter>,
             {"volume", "mute"}
     };
 
-    _pimple->converters_full_info["cut_converter"] = {
+    _pimpl->converters_full_info["cut_converter"] = {
             "Description 4",
             create<RawCutConverter>,
             {"cut", "extract"}
     };
 
-    _pimple->converters_full_info["insert_converter"] = {
+    _pimpl->converters_full_info["insert_converter"] = {
             "Description 5",
             create<RawInsertConverter>,
             {"insert", "front", "back"}
     };
 
-    for (const auto& [name, data] : _pimple->converters_full_info){
-        _pimple->converters_info[name] = {data.description, data.commands};
+    for (const auto& [name, data] : _pimpl->converters_full_info){
+        _pimpl->converters_info[name] = {data.description, data.commands};
     }
 }
 
 Converter ConvertersFactory::create_converter(const std::string& command_name) const{
-    for (const auto& [converter_name, info] : _pimple->converters_full_info){
+    for (const auto& [converter_name, info] : _pimpl->converters_full_info){
         const auto& commands_vector = info.commands;
 
         if (contains(commands_vector, command_name)){
@@ -67,9 +67,9 @@ Converter ConvertersFactory::create_converter(const std::string& command_name) c
 }
 
 const ConvertersInfo& ConvertersFactory::get_converters_info() const{
-    return _pimple->converters_info;
+    return _pimpl->converters_info;
 }
 
 ConvertersFactory::~ConvertersFactory(){
-    delete _pimple;
+    delete _pimpl;
 }

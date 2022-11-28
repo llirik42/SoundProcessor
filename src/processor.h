@@ -19,7 +19,7 @@ public:
 
     ~Processor();
 private:
-    struct Imple;
+    struct Impl;
 
-    Imple* _pimple;
+    Impl* _pimpl;
 };

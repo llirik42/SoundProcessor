@@ -51,7 +51,7 @@ Command parse_command(std::string& command_string){
     return extract_command(command_string);
 }
 
-struct ConfigParser::Imple{
+struct ConfigParser::Impl{
     std::vector<Command> commands;
 
     void Parse(std::ifstream& config_file){
@@ -70,7 +70,7 @@ struct ConfigParser::Imple{
 };
 
 ConfigParser::ConfigParser(const std::string& config_path){
-    _pimple = new Imple;
+    _pimpl = new Impl;
 
     std::ifstream config_file(config_path);
 
@@ -78,17 +78,17 @@ ConfigParser::ConfigParser(const std::string& config_path){
         throw IncorrectConfigError();
     }
 
-    _pimple->Parse(config_file);
+    _pimpl->Parse(config_file);
 }
 
 ConfigParser::ConfigParserIterator ConfigParser::begin() const{
-    return _pimple->commands.begin();
+    return _pimpl->commands.begin();
 }
 
 ConfigParser::ConfigParserIterator ConfigParser::end() const{
-    return _pimple->commands.end();
+    return _pimpl->commands.end();
 }
 
 ConfigParser::~ConfigParser(){
-    delete _pimple;
+    delete _pimpl;
 }
