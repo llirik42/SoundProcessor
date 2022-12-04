@@ -26,7 +26,7 @@ namespace WAVFormatInfo{
 
 namespace WAVManagement{
     struct WAVInfo{
-        size_t duration_s;
+        float duration_s;
         size_t samples_count;
         fpos_t data_start_position;
     };
@@ -40,7 +40,7 @@ namespace WAVManagement{
     public:
         explicit WAVReader(std::string_view file_path);
 
-        [[nodiscard]] size_t get_duration_s() const;
+        [[nodiscard]] float get_duration_s() const;
 
         [[nodiscard]] size_t get_samples_count() const;
 
@@ -53,6 +53,7 @@ namespace WAVManagement{
         [[nodiscard]] bool available() const;
 
         ~WAVReader();
+
     private:
         struct Impl;
         Impl* _pimpl;
@@ -65,10 +66,9 @@ namespace WAVManagement{
         void write_sample(WAVFormatInfo::Sample sample);
 
         ~WAVWriter();
+
     private:
         struct Impl;
         Impl* _pimpl;
     };
-
-    size_t get_sample_number_by_time(size_t time_s);
 }

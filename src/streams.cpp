@@ -14,7 +14,7 @@ void Streams::InputStream::skip(size_t start_sample, size_t end_sample){
     _reader.skip(start_sample, end_sample);
 }
 
-size_t Streams::InputStream::get_duration_s() const{
+float Streams::InputStream::get_duration_s() const{
     return _reader.get_duration_s();
 }
 

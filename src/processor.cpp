@@ -57,6 +57,9 @@ Processor::Processor(const std::string_view& config,
                      const std::vector<std::string>& additional_files,
                      const ConvertersFactory& factory){
 
+    // For validation
+    WAVManagement::WAVParser::parse(in);
+
     _pimpl = new Impl{
         out,
         in,

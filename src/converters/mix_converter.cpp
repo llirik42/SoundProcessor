@@ -2,6 +2,8 @@
 #include "converters_utils.h"
 #include "mix_converter.h"
 
+#include <iostream>
+
 void mix(Streams::OutputStream& output_stream,
          Streams::InputStream& input_stream,
          Streams::InputStream& additional_input_stream,
@@ -28,17 +30,19 @@ void mix(Streams::OutputStream& output_stream,
         output_stream.write(result_sample);
     }
 
+    std::cout << input_stream.available() << '\n';
+
     while (input_stream.available()){
         output_stream.write(input_stream.read_element());
     }
 }
 
-void RawMixConverter::convert(std::string_view command,
+void RawMixConverter::convert([[maybe_unused]] std::string_view command,
                               Streams::OutputStream& output_stream,
                               Streams::InputStream& input_stream,
                               const ConverterParams& params) const{
 
-    if (command != "mix" || (params.size() != 4 && params.size() != 5)){
+    if (params.size() != 4 && params.size() != 5){
         throw Exceptions::IncorrectCommandsParams();
     }
 
@@ -66,7 +70,6 @@ void RawMixConverter::convert(std::string_view command,
     );
 
     check_time_fragment(start_sample, end_sample, additional_stream);
-
     size_t end_in_input_file = place_in_input_file + end_sample - start_sample;
     check_time_fragment(place_in_input_file, end_in_input_file, input_stream);
 

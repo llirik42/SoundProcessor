@@ -154,8 +154,10 @@ WAVManagement::WAVInfo WAVManagement::WAVParser::parse(std::string_view file_pat
         throw Exceptions::IncorrectWavError();
     }
 
+    float duration_s = static_cast<float>(samples_count) / static_cast<float>(WAVFormatInfo::SUPPORTED_SAMPLE_RATE);
+
     return WAVInfo{
-            samples_count / WAVFormatInfo::SUPPORTED_SAMPLE_RATE,
+        duration_s,
         samples_count,
         data_start_position
     };
@@ -168,7 +170,7 @@ struct WAVManagement::WAVReader::Impl{
 
     size_t read_samples_count;
 
-    size_t duration_s;
+    float duration_s;
 
     size_t total_samples_count;
 
@@ -238,9 +240,11 @@ WAVManagement::WAVReader::WAVReader(std::string_view file_path){
     _pimpl->ifstream.seekg(info.data_start_position);
 
     _pimpl->read();
+
+    _pimpl->read_samples_count = static_cast<size_t>(_pimpl->ifstream.gcount());
 }
 
-size_t WAVManagement::WAVReader::get_duration_s() const{
+float WAVManagement::WAVReader::get_duration_s() const{
     return _pimpl->duration_s;
 }
 
@@ -376,8 +380,4 @@ WAVManagement::WAVWriter::~WAVWriter(){
     _pimpl->replace_samples_count_in_file();
 
     delete _pimpl;
-}
-
-size_t WAVManagement::get_sample_number_by_time(size_t time_s){
-    return time_s * WAVFormatInfo::SUPPORTED_SAMPLE_RATE;
 }

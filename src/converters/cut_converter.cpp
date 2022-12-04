@@ -18,12 +18,12 @@ void cut(Streams::OutputStream& output_stream,
     }
 }
 
-void RawCutConverter::convert(std::string_view command,
+void RawCutConverter::convert([[maybe_unused]] std::string_view command,
                               Streams::OutputStream& output_stream,
                               Streams::InputStream& input_stream,
                               const ConverterParams& params) const{
 
-    if (command != "cut" || params.size() != 2){
+    if (params.size() != 2){
         throw Exceptions::IncorrectCommandsParams();
     }
 
