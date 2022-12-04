@@ -5,7 +5,7 @@
 #include "converters_factory.h"
 #include "processor.h"
 
-std::string get_program_description(const CommandsDescription& commands_description){
+std::string get_program_description(const Factory::CommandsDescription& commands_description){
     std::string program_description = "The program performs audio conversions specified in the config "
                                       "file and saves result to an output file.\n\n"
                                       "Supports only WAV files with:\n"
@@ -40,9 +40,9 @@ std::string get_program_description(const CommandsDescription& commands_descript
 }
 
 int main(int argc, char** argv){
-    ConvertersFactory factory;
+    Factory::ConvertersFactory factory;
 
-    const CommandsDescription& commands_description = factory.get_commands_description();
+    const Factory::CommandsDescription& commands_description = factory.get_commands_description();
 
     std::string program_description = get_program_description(commands_description);
 

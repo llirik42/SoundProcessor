@@ -21,7 +21,7 @@ void cut(Streams::OutputStream& output_stream,
 void RawCutConverter::convert([[maybe_unused]] std::string_view command,
                               Streams::OutputStream& output_stream,
                               Streams::InputStream& input_stream,
-                              const ConverterParams& params) const{
+                              const Converters::ConverterParams& params) const{
 
     if (params.size() != 2){
         throw Exceptions::IncorrectCommandsParams();

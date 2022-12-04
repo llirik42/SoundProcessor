@@ -2,12 +2,12 @@
 
 #include "abstract_converter.h"
 
-class RawVolumeConverter : public RawAbstractConverter{
+class RawVolumeConverter : public Converters::RawAbstractConverter{
 public:
     void convert(std::string_view command,
                  Streams::OutputStream& output_stream,
                  Streams::InputStream& input_stream,
-                 const ConverterParams& params) const override;
+                 const Converters::ConverterParams& params) const override;
 
     ~RawVolumeConverter() override = default;
 };

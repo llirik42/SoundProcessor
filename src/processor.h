@@ -11,7 +11,7 @@ namespace Processing{
                   const std::string_view& out,
                   const std::string_view& in,
                   const std::vector<std::string>& additional_files,
-                  const ConvertersFactory& factory);
+                  const Factory::ConvertersFactory& factory);
 
         void process() const;
 

@@ -17,10 +17,10 @@ void reduce_spaces(std::string& string){
     string = std::regex_replace(string, regex, " ");
 }
 
-Command extract_command(std::string& command_string){
+ConfigParsing::Command extract_command(std::string& command_string){
     static const std::string_view delimiter = " ";
 
-    Command result;
+    ConfigParsing::Command result;
 
     if (!isspace(command_string.back())){
         command_string.push_back(' ');
@@ -47,7 +47,7 @@ Command extract_command(std::string& command_string){
     return result;
 }
 
-Command parse_command(std::string& command_string){
+ConfigParsing::Command parse_command(std::string& command_string){
     static const std::regex empty_line_regex(R"((#.*)|(\s*))");
 
     if (std::regex_match(command_string.data(), empty_line_regex)){
@@ -59,13 +59,13 @@ Command parse_command(std::string& command_string){
     return extract_command(command_string);
 }
 
-struct ConfigParser::Impl{
+struct ConfigParsing::ConfigParser::Impl{
     std::vector<Command> commands;
 
     void parse(std::ifstream& config_file);
 };
 
-void ConfigParser::Impl::parse(std::ifstream& config_file){
+void ConfigParsing::ConfigParser::Impl::parse(std::ifstream& config_file){
     while (!config_file.eof()){
         std::string command_string;
 
@@ -80,7 +80,7 @@ void ConfigParser::Impl::parse(std::ifstream& config_file){
     }
 }
 
-ConfigParser::ConfigParser(std::string_view config_path){
+ConfigParsing::ConfigParser::ConfigParser(std::string_view config_path){
     _pimpl = new Impl;
 
     std::ifstream config_file(config_path.data());
@@ -92,14 +92,14 @@ ConfigParser::ConfigParser(std::string_view config_path){
     _pimpl->parse(config_file);
 }
 
-ConfigParser::ConfigParserIterator ConfigParser::begin() const{
+ConfigParsing::ConfigParser::ConfigParserIterator ConfigParsing::ConfigParser::begin() const{
     return _pimpl->commands.begin();
 }
 
-ConfigParser::ConfigParserIterator ConfigParser::end() const{
+ConfigParsing::ConfigParser::ConfigParserIterator ConfigParsing::ConfigParser::end() const{
     return _pimpl->commands.end();
 }
 
-ConfigParser::~ConfigParser(){
+ConfigParsing::ConfigParser::~ConfigParser(){
     delete _pimpl;
 }

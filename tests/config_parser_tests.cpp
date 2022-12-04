@@ -4,16 +4,12 @@
 
 // incorrect path
 TEST(ConfigsParserTests, test_incorrect_path){
-    EXPECT_THROW(
-            ConfigParser("<incorrect path>"),
-            Exceptions::IncorrectConfigError
-            );
+    EXPECT_THROW(ConfigParsing::ConfigParser("<incorrect path>"),
+                 Exceptions::IncorrectConfigError);
 }
 
 // incorrect path
 TEST(ConfigsParserTests, test_empty_file){
-    EXPECT_THROW(
-            ConfigParser("../tests/config_files_for_tests/empty_config.txt"),
-            Exceptions::IncorrectConfigError
-            );
+    EXPECT_THROW(ConfigParsing::ConfigParser("../tests/config_files_for_tests/empty_config.txt"),
+                 Exceptions::IncorrectConfigError);
 }

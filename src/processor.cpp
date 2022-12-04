@@ -14,15 +14,15 @@ struct Processing::Processor::Impl{
 
     std::vector<Streams::InputStream> additional_streams;
 
-    ConfigParser config_parser;
+    ConfigParsing::ConfigParser config_parser;
 
-    const ConvertersFactory& factory;
+    const Factory::ConvertersFactory& factory;
 
-    ConverterParams create_params(const std::vector<std::string>& command_args);
+    Converters::ConverterParams create_params(const std::vector<std::string>& command_args);
 };
 
-ConverterParams Processing::Processor::Impl::create_params(const std::vector<std::string>& command_args){
-    ConverterParams result;
+Converters::ConverterParams Processing::Processor::Impl::create_params(const std::vector<std::string>& command_args){
+    Converters::ConverterParams result;
 
     for (const auto& current_arg : command_args){
         if (current_arg[0] == FILE_INDEX_SYMBOL){
@@ -57,7 +57,7 @@ Processing::Processor::Processor(const std::string_view& config,
                                  const std::string_view& out,
                                  const std::string_view& in,
                                  const std::vector<std::string>& additional_files,
-                                 const ConvertersFactory& factory){
+                                 const Factory::ConvertersFactory& factory){
 
     // For validation
     WAVManagement::WAVParser::parse(in);
@@ -65,7 +65,7 @@ Processing::Processor::Processor(const std::string_view& config,
     _pimpl = new Impl{out,
                       in,
                       {},
-                      ConfigParser(config),
+                      ConfigParsing::ConfigParser(config),
                       factory};
 
     for (const auto& file : additional_files){
@@ -84,7 +84,7 @@ void Processing::Processor::process() const{
 
     for (const auto& [command_name, command_args] : _pimpl->config_parser){
         try{
-            const Converter& current_converter = _pimpl->factory.create_converter(command_name);
+            const Converters::Converter& current_converter = _pimpl->factory.create_converter(command_name);
 
             auto current_params = _pimpl->create_params(command_args);
 

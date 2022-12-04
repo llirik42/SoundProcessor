@@ -27,7 +27,7 @@ void insert(Streams::OutputStream& output_stream,
 void RawInsertConverter::convert(std::string_view command,
                                  Streams::OutputStream& output_stream,
                                  Streams::InputStream& input_stream,
-                                 const ConverterParams& params) const{
+                                 const Converters::ConverterParams& params) const{
 
     if ((command == "insert" && params.size() != 4) || ((command == "front" || command == "back") && params.size() != 3)){
         throw Exceptions::IncorrectCommandsParams();

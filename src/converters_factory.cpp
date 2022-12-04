@@ -4,21 +4,21 @@
 #include "custom_exceptions.h"
 #include "converters_factory.h"
 
-struct ConvertersFactory::Impl{
+struct Factory::ConvertersFactory::Impl{
     struct CommandInfo{
         std::string_view description;
         std::vector<std::string_view> examples;
-        std::function<Converter(void)> converter_creation;
+        std::function<Converters::Converter(void)> converter_creation;
     };
 
     std::map<std::string_view, CommandInfo> commands_full_info;
 
     CommandsDescription commands_description;
 
-    Converter create_converter_by_command(std::string_view command_name);
+    Converters::Converter create_converter_by_command(std::string_view command_name);
 };
 
-Converter ConvertersFactory::Impl::create_converter_by_command(std::string_view command_name){
+Converters::Converter Factory::ConvertersFactory::Impl::create_converter_by_command(std::string_view command_name){
     for (const auto& [current_command, info] : commands_full_info){
         if (current_command == command_name){
             return info.converter_creation();
@@ -29,11 +29,11 @@ Converter ConvertersFactory::Impl::create_converter_by_command(std::string_view 
 }
 
 template<typename T>
-Converter create(){
+Converters::Converter create(){
     return std::make_unique<T>();
 }
 
-ConvertersFactory::ConvertersFactory(){
+Factory::ConvertersFactory::ConvertersFactory(){
     _pimpl = new Impl;
 
     _pimpl->commands_full_info["mute"] = {
@@ -83,8 +83,8 @@ ConvertersFactory::ConvertersFactory(){
     }
 }
 
-const Converter& ConvertersFactory::create_converter(std::string_view command_name) const{
-    static std::map<std::string_view, Converter> converters;
+const Converters::Converter& Factory::ConvertersFactory::create_converter(std::string_view command_name) const{
+    static std::map<std::string_view, Converters::Converter> converters;
 
     if (!Utils::contains(converters, command_name)){
         converters[command_name] = _pimpl->create_converter_by_command(command_name);
@@ -93,10 +93,10 @@ const Converter& ConvertersFactory::create_converter(std::string_view command_na
     return converters.at(command_name);
 }
 
-const CommandsDescription& ConvertersFactory::get_commands_description() const{
+const Factory::CommandsDescription& Factory::ConvertersFactory::get_commands_description() const{
     return _pimpl->commands_description;
 }
 
-ConvertersFactory::~ConvertersFactory(){
+Factory::ConvertersFactory::~ConvertersFactory(){
     delete _pimpl;
 }
