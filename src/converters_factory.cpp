@@ -5,15 +5,15 @@
 #include "converters_factory.h"
 
 struct ConvertersFactory::Impl{
-    struct SingleConverterData{
-        std::string description;
-        std::function<Converter(void)> create;
-        std::vector<std::string> commands;
+    struct CommandInfo{
+        std::string_view description;
+        std::vector<std::string_view> examples;
+        std::function<Converter(void)> converter_creation;
     };
 
-    std::map<const std::string, SingleConverterData> converters_full_info;
+    std::map<std::string_view, CommandInfo> commands_full_info;
 
-    ConvertersInfo converters_info;
+    CommandsDescription commands_description;
 };
 
 template<typename T>
@@ -24,50 +24,59 @@ Converter create(){
 ConvertersFactory::ConvertersFactory(){
     _pimpl = new Impl;
 
-    _pimpl->converters_full_info["mix_converter"] = {
-            "Description 2",
-            create<RawMixConverter>,
-            {"mix"}
+    _pimpl->commands_full_info["mute"] = {
+            "mutes fragment of file",
+            {"mute <input_file> <place_in_file>"},
+            create<RawVolumeConverter>
     };
 
-    _pimpl->converters_full_info["volume_converter"] = {
-            "Description 3",
-            create<RawVolumeConverter>,
-            {"volume", "mute"}
+    _pimpl->commands_full_info["volume"] = {
+            "sets certain level of volume in fragment of file with coefficient",
+            {"volume <input_file> <coefficient> <place_in_file>"},
+            create<RawVolumeConverter>
     };
 
-    _pimpl->converters_full_info["cut_converter"] = {
-            "Description 4",
-            create<RawCutConverter>,
-            {"cut", "extract"}
+    _pimpl->commands_full_info["mix"] = {
+            "mixes two files",
+            {"<input_file_1> <input_file_2> <place_in_file_1> <place_in_file_2>"},
+            create<RawMixConverter>
     };
 
-    _pimpl->converters_full_info["insert_converter"] = {
-            "Description 5",
-            create<RawInsertConverter>,
-            {"insert", "front", "back"}
+    _pimpl->commands_full_info["cut"] = {
+            "removes fragment of file",
+            {"<input_file> <place_in_file>"},
+            create<RawCutConverter>
     };
 
-    for (const auto& [name, data] : _pimpl->converters_full_info){
-        _pimpl->converters_info[name] = {data.description, data.commands};
+    _pimpl->commands_full_info["front"] = {
+            "Appends fragment of file (file2) to other one (file1)",
+            {"<input_file_1> <input_file_2> <place_in_file_2>"},
+            create<RawInsertConverter>
+    };
+
+    _pimpl->commands_full_info["back"] = {
+            "inserts at the beginning fragment of file (file2) to other one (file1)",
+            {"<input_file_1> <input_file_2> <place_in_file_2>"},
+            create<RawInsertConverter>
+    };
+
+    _pimpl->commands_full_info["insert"] = {
+            "inserts fragment of file (file2) to certain place of other one (file1)",
+            {"<input_file_1> <input_file_2> <place_in_file_1> <place_in_file_2>"},
+            create<RawInsertConverter>
+    };
+
+    for (const auto& [name, data] : _pimpl->commands_full_info){
+        _pimpl->commands_description[name] = {data.description, data.examples};
     }
 }
 
-Converter ConvertersFactory::create_converter(const std::string& command_name) const{
-    for (const auto& [converter_name, info] : _pimpl->converters_full_info){
-        const auto& commands_vector = info.commands;
-
-        if (contains(commands_vector, command_name)){
-            return info.create();
-        }
-    }
-
-    // Actually, it cannot happen because of the code before this creation)
-    throw Exceptions::IncorrectConfigError();
+Converter ConvertersFactory::create_converter(const std::string_view& command_name) const{
+    return create<RawMixConverter>();
 }
 
-const ConvertersInfo& ConvertersFactory::get_converters_info() const{
-    return _pimpl->converters_info;
+const CommandsDescription& ConvertersFactory::get_commands_description() const{
+    return _pimpl->commands_description;
 }
 
 ConvertersFactory::~ConvertersFactory(){

@@ -5,7 +5,7 @@
 #include "converters_factory.h"
 #include "processor.h"
 
-std::string get_program_description(const ConvertersInfo& converters_info){
+std::string get_program_description(const CommandsDescription& commands_description){
     std::string program_description = "The program performs audio conversions specified in the config "
                                       "file and saves result to an output file.\n\n"
                                       "Supports only WAV files with:\n"
@@ -13,18 +13,27 @@ std::string get_program_description(const ConvertersInfo& converters_info){
                                       "  1 channel (mono)\n"
                                       "  bit depth - signed 16 bit (little endian)\n"
                                       "  sample rate - 44100 Hz\n\n"
-                                      "Converters:\n";
+                                      "Commands work with files and places in files. First arg in each command is input file (default value is $1). Place in file can be presented by two numbers (start-time and end-time in seconds) or with using <- and ->. First one means everything before, second one - everything after.\n\n"
+                                      "Commands:\n\n";
 
     const unsigned int default_padding = 22;
-    for (const auto& [name, description_commands] : converters_info){
+    for (const auto& [name, data] : commands_description){
         const auto length = name.length();
 
-        const auto& [description, _] = description_commands;
+        const auto& [description, examples] = data;
 
         program_description.append("  ");
         program_description.append(name);
         program_description.append(default_padding - length, ' ');
         program_description.append(description);
+        program_description.append(1, '\n');
+
+        for (const auto& example : examples){
+            program_description.append(1, '\n');
+            program_description.append(4, ' ');
+            program_description.append(example);
+            program_description.append(1, '\n');
+        }
         program_description.append(1, '\n');
     }
     return program_description;
@@ -33,27 +42,27 @@ std::string get_program_description(const ConvertersInfo& converters_info){
 int main(int argc, char** argv){
     ConvertersFactory factory;
 
-    const ConvertersInfo& converters_info = factory.get_converters_info();
+    const CommandsDescription& commands_description = factory.get_commands_description();
 
-    std::string program_description = get_program_description(converters_info);
+    std::string program_description = get_program_description(commands_description);
 
     argparse::ArgumentParser program("SoundProcessor");
     program.add_description(program_description);
 
     program.add_argument("output_file")
-            .help("The output file")
+            .help("the output file")
             .required();
 
     program.add_argument("input_file")
-            .help("The input file")
+            .help("the input file")
             .required();
 
     program.add_argument("additional_files")
-            .help("Additional files")
+            .help("additional files")
             .nargs(argparse::nargs_pattern::any);
 
     program.add_argument("-c", "--config")
-            .help("Specify config file")
+            .help("specify config file")
             .required();
 
     try {

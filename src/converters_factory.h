@@ -3,18 +3,19 @@
 #include <string>
 #include <map>
 #include <utility>
+#include <vector>
 #include "converters/all_converters.h"
 
-// Key - converter, pair - contains description and vector of commands
-using ConvertersInfo = std::map<std::string, std::pair<std::string, std::vector<std::string>>>;
+// Key - command name, pair - description + examples of command
+using CommandsDescription = std::map<std::string_view, std::pair<std::string_view, std::vector<std::string_view>>>;
 
 class ConvertersFactory{
 public:
     ConvertersFactory();
 
-    [[nodiscard]] Converter create_converter(const std::string& command_name) const;
+    [[nodiscard]] Converter create_converter(const std::string_view& command_name) const;
 
-    [[nodiscard]] const ConvertersInfo& get_converters_info() const;
+    [[nodiscard]] const CommandsDescription& get_commands_description() const;
 
     ~ConvertersFactory();
 private:
