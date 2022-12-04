@@ -13,7 +13,7 @@ std::string get_program_description(const CommandsDescription& commands_descript
                                       "  1 channel (mono)\n"
                                       "  bit depth - signed 16 bit (little endian)\n"
                                       "  sample rate - 44100 Hz\n\n"
-                                      "Commands work with files and places in files. Place in file can be presented by two numbers (start-time and end-time in seconds) or with using <- and ->. First one means everything before, second one - everything after.\n\n"
+                                      "Commands work with files, fragment and places of files. All conversions apply to input file with help of additional files. Fragment of file can be presented by two float numbers, place - by one float number.Also, you can use <- and ->, first one means everything before, second one - everything after.\n\n"
                                       "Commands:\n\n";
 
     const unsigned int default_padding = 22;

@@ -38,43 +38,43 @@ ConvertersFactory::ConvertersFactory(){
 
     _pimpl->commands_full_info["mute"] = {
             "mutes fragment of file",
-            {"mute <place_in_file>"},
+            {"mute <fragment_of_file>"},
             create<RawVolumeConverter>
     };
 
     _pimpl->commands_full_info["volume"] = {
             "sets certain level of volume in fragment of file with coefficient",
-            {"volume <coefficient> <place_in_file>"},
+            {"volume <coefficient> <fragment_of_file>"},
             create<RawVolumeConverter>
     };
 
     _pimpl->commands_full_info["mix"] = {
             "mixes two files",
-            {"<additional_file> <place_in_input_file> <place_in_additional_files>"},
+            {"<additional_file> <place_in_input_file> <fragment_of_additional_file>"},
             create<RawMixConverter>
     };
 
     _pimpl->commands_full_info["cut"] = {
             "removes fragment of file",
-            {"<place_in_file>"},
+            {"<fragment_of_file>"},
             create<RawCutConverter>
     };
 
     _pimpl->commands_full_info["front"] = {
-            "Appends fragment of file (file2) to other one (file1)",
-            {"<additional_file> <place_in_additional_file>"},
+            "appends fragment of file (additional_file) to other one (input_file)",
+            {"<additional_file> <fragment_of_additional_file>"},
             create<RawInsertConverter>
     };
 
     _pimpl->commands_full_info["back"] = {
-            "inserts at the beginning fragment of file (file2) to other one (file1)",
-            {"<additional_file> <place_in_additional_file>"},
+            "inserts fragment of file (additional_file) into the beginning to other one (input_file)",
+            {"<additional_file> <fragment_of_additional_file>"},
             create<RawInsertConverter>
     };
 
     _pimpl->commands_full_info["insert"] = {
-            "inserts fragment of file (file2) to certain place of other one (file1)",
-            {"<additional_file> <place_in_input_file> <place_in_additional_file>"},
+            "inserts fragment of file (additional_file) to certain place of other one (input_file)",
+            {"<additional_file> <place_in_input_file> <fragment_of_additional_file>"},
             create<RawInsertConverter>
     };
 
