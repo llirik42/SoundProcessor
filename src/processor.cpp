@@ -1,6 +1,6 @@
 #include <filesystem>
 #include "streams.h"
-#include "exceptions.h"
+#include "custom_exceptions.h"
 #include "utils.h"
 #include "processor.h"
 #include "config_parser.h"

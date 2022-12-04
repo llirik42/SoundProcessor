@@ -1,4 +1,4 @@
-#include "../exceptions.h"
+#include "../custom_exceptions.h"
 #include "converters_utils.h"
 #include "insert_converter.h"
 
@@ -54,20 +54,20 @@ void RawInsertConverter::convert(std::string_view command,
     size_t index1 = command == "insert" ? 2 : 1;
     size_t index2 = command == "insert" ? 3 : 2;
 
-    auto start_place = calculate_sample_index_by_time(convert_any<float>(params[index1]),
-            input_stream);
+    auto start_sample = calculate_sample_index_by_time(convert_any<float>(params[index1]),
+                                                       input_stream);
 
-    auto end_place = calculate_sample_index_by_time(convert_any<float>(params[index2]),
-            input_stream);
+    auto end_sample = calculate_sample_index_by_time(convert_any<float>(params[index2]),
+                                                     input_stream);
 
-    check_time_fragment(start_place, end_place, additional_stream);
-    size_t end_in_input_file = insert_place + end_place - start_place;
+    check_time_fragment(start_sample, end_sample, additional_stream);
+    size_t end_in_input_file = insert_place + end_sample - start_sample;
     check_time_fragment(insert_place, end_in_input_file, input_stream);
 
     insert(output_stream,
            input_stream,
            additional_stream,
            insert_place,
-           start_place,
-           end_place);
+           start_sample,
+           end_sample);
 }

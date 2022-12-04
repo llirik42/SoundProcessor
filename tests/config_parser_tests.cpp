@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "../src/config_parser.h"
-#include "../src/exceptions.h"
+#include "../src/custom_exceptions.h"
 
 // incorrect path
 TEST(ConfigsParserTests, test_incorrect_path){

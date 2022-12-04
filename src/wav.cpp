@@ -1,5 +1,5 @@
 #include <fstream>
-#include "exceptions.h"
+#include "custom_exceptions.h"
 #include "utils.h"
 #include "wav.h"
 

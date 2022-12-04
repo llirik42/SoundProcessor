@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "../src/wav.h"
-#include "../src/exceptions.h"
+#include "../src/custom_exceptions.h"
 
 // incorrect path
 TEST(WavTests, test_incorrect_path){

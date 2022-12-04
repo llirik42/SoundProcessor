@@ -1,6 +1,6 @@
 #include <regex>
 #include "config_parser.h"
-#include "exceptions.h"
+#include "custom_exceptions.h"
 #include "utils.h"
 
 void reduce_spaces(std::string& string){

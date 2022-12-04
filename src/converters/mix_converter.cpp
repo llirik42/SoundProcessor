@@ -1,8 +1,6 @@
-#include "../exceptions.h"
+#include "../custom_exceptions.h"
 #include "converters_utils.h"
 #include "mix_converter.h"
-
-#include <iostream>
 
 void mix(Streams::OutputStream& output_stream,
          Streams::InputStream& input_stream,
@@ -29,8 +27,6 @@ void mix(Streams::OutputStream& output_stream,
 
         output_stream.write(result_sample);
     }
-
-    std::cout << input_stream.available() << '\n';
 
     while (input_stream.available()){
         output_stream.write(input_stream.read_element());
