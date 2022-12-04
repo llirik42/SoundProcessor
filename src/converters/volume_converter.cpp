@@ -1,8 +1,8 @@
 #include "../utils.h"
 #include "../exceptions.h"
-#include "../wav_format_info.h"
 #include "volume_converter.h"
 
+/*
 void convert_volume(std::ofstream& output, WAVFile& input, float volume_coefficient, size_t start_sample, size_t stop_sample){
     write_default_wav_headers(output, input.get_samples_count());
 
@@ -16,8 +16,9 @@ void convert_volume(std::ofstream& output, WAVFile& input, float volume_coeffici
         write_sample(output, sample);
     }
 }
-
+*/
 void RawVolumeConverter::convert([[maybe_unused]] const std::string& command, [[maybe_unused]] const ConverterParams& params) const{
+    /*
     ConverterParams new_params = params;
 
     if (command == "mute"){
@@ -79,5 +80,5 @@ void RawVolumeConverter::convert([[maybe_unused]] const std::string& command, [[
             volume_coefficient,
             start_seconds * SUPPORTED_SAMPLE_RATE,
             stop_seconds * SUPPORTED_SAMPLE_RATE
-            );
+            );*/
 }

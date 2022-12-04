@@ -1,7 +1,6 @@
 #include <vector>
 #include <string>
 #include <argparse/argparse.hpp>
-#include "error_codes.h"
 #include "exceptions.h"
 #include "converters_factory.h"
 #include "processor.h"
@@ -69,18 +68,18 @@ int main(int argc, char** argv){
 
         processor.process();
     }
-    catch(const AbstractException& exception){
+    catch(const Exceptions::AbstractException& exception){
         std::cerr << exception.what() << '\n';
         return exception.code();
     }
-    catch (const std::runtime_error& err){ // Incorrect args
-        std::cerr << err.what() << '\n';
-        return INCORRECT_ARGS_ERROR_CODE;
+    catch (const std::runtime_error& exception){ // Incorrect args
+        std::cerr << exception.what() << '\n';
+        return Exceptions::INCORRECT_ARGS_ERROR_CODE;
     }
     catch(...){ // Something bad happened ..
         std::cerr << "Something really bad and unpredicted happened ...\n";
-        return UNEXPECTED_ERROR_CODE;
+        return Exceptions::UNEXPECTED_ERROR_CODE;
     }
 
-    return 0;
+    return Exceptions::SUCCESS;
 }

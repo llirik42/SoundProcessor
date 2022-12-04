@@ -75,7 +75,7 @@ ConfigParser::ConfigParser(const std::string& config_path){
     std::ifstream config_file(config_path);
 
     if (!config_file.is_open() || is_file_empty(config_file)){
-        throw IncorrectConfigError();
+        throw Exceptions::IncorrectConfigError();
     }
 
     _pimpl->Parse(config_file);

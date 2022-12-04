@@ -3,7 +3,6 @@
 #include <memory>
 #include <vector>
 #include <string>
-#include "../wav_file.h"
 #include "../config_parser.h"
 
 class RawAbstractConverter;

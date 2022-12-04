@@ -56,7 +56,7 @@ struct Processor::Impl{
 
             // Met unknown command
             if (!found_converter){
-                throw UnknownCommandError();
+                throw Exceptions::UnknownCommandError();
             }
         }
     }
@@ -80,13 +80,13 @@ struct Processor::Impl{
                     auto file_index = static_cast<size_t>(strtoul(param.c_str() + 1, nullptr, 10));
 
                     if (file_index == 0 || file_index > additional_files_paths.size()){
-                        throw IncorrectCommandsParams();
+                        throw Exceptions::IncorrectCommandsParams();
                     }
 
                     param = additional_files_paths[file_index - 1];
                 }
                 catch(...){
-                    throw IncorrectCommandsParams();
+                    throw Exceptions::IncorrectCommandsParams();
                 }
             }
         }
@@ -144,7 +144,7 @@ void Processor::process() const{
         std::remove(path_of_tmp2.c_str());
     }
     catch(...){
-        throw IOError();
+        throw Exceptions::IOError();
     }
 }
 

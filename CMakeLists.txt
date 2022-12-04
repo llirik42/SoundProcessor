@@ -29,8 +29,9 @@ add_library(corelib OBJECT
         src/config_parser.cpp
         src/converters_factory.cpp
         src/processor.cpp
+        src/streams.cpp
         src/utils.cpp
-        src/wav_file.cpp
+        src/wav.cpp
         )
 
 add_executable(${exe_name} src/main.cpp)
@@ -41,7 +42,7 @@ target_compile_options(corelib PUBLIC
         -Wall
         -Wextra
         -pedantic
-        -Werror
+        #-Werror
         -Wctor-dtor-privacy # Class seems unusable because all the constructors or destructors in that class are private
         -Wnon-virtual-dtor # Class has virtual functions and an accessible non-virtual destructor
         -Wold-style-cast # Old-style cast to a non-void type is used
