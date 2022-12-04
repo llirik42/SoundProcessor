@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <string>
-#include <limits>
 
 struct Command{
     std::string command_name;
@@ -13,7 +12,7 @@ class ConfigParser{
 public:
     using ConfigParserIterator = std::vector<Command>::const_iterator;
 
-    explicit ConfigParser(const std::string& config_path);
+    explicit ConfigParser(const std::string_view& config_path);
 
     [[nodiscard]] ConfigParserIterator begin() const;
 

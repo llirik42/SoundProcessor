@@ -18,7 +18,7 @@ void reduce_spaces(std::string& string){
 }
 
 Command extract_command(std::string& command_string){
-    static const std::string delimiter = " ";
+    static const std::string_view delimiter = " ";
 
     Command result;
 
@@ -69,12 +69,12 @@ struct ConfigParser::Impl{
     }
 };
 
-ConfigParser::ConfigParser(const std::string& config_path){
+ConfigParser::ConfigParser(const std::string_view& config_path){
     _pimpl = new Impl;
 
-    std::ifstream config_file(config_path);
+    std::ifstream config_file(config_path.data());
 
-    if (!config_file.is_open() || is_file_empty(config_file)){
+    if (!config_file.is_open() || Utils::is_file_empty(config_file)){
         throw Exceptions::IncorrectConfigError();
     }
 
