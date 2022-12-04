@@ -41,11 +41,19 @@ Converters::ConverterParams Processing::Processor::Impl::create_params(const std
             }
         }
         else{
-            try{
-                result.push_back(std::stof(current_arg));
+            if (current_arg == Processing::LEFT_ARROW){
+                result.push_back(Processing::LEFT_TIME_ARROW_ALIAS);
             }
-            catch(...){
-                throw Exceptions::IncorrectCommandsParams();
+            else if (current_arg == Processing::RIGHT_ARROW){
+                result.push_back(Processing::RIGHT_TIME_ARROW_ALIAS);
+            }
+            else{
+                try{
+                    result.push_back(std::stof(current_arg));
+                }
+                catch(...){
+                    throw Exceptions::IncorrectCommandsParams();
+                }
             }
         }
     }

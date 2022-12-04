@@ -52,7 +52,6 @@ target_compile_options(corelib PUBLIC
         -Wsign-promo # Non-obvious choice of an overloaded function
         -Wduplicated-branches # if-else has identical branches
         -Wduplicated-cond # Duplicated conditions in an if-else-if chain
-        -Wfloat-equal # Floating-point values are used in equality comparisons
         -Wconversion # Implicit conversions that may alter a value
         -Wsign-conversion # implicit conversions that may change the sign of an integer value
         -Wzero-as-null-pointer-constant # 0 is used as null pointer constant
