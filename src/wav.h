@@ -40,9 +40,9 @@ namespace WAVManagement{
     public:
         explicit WAVReader(std::string_view file_path);
 
-        [[nodiscard]] size_t get_duration_s();
+        [[nodiscard]] size_t get_duration_s() const;
 
-        [[nodiscard]] size_t get_samples_count();
+        [[nodiscard]] size_t get_samples_count() const;
 
         [[nodiscard]] WAVFormatInfo::Sample read_sample();
 

@@ -10,26 +10,14 @@ struct Processor::Impl{
 
     std::string_view input_file_path;
 
-    std::vector<std::string_view> additional_files_paths;
+    std::vector<Streams::InputStream> additional_streams;
 
     ConfigParser config_parser;
 
     const ConvertersFactory& factory;
 
-    std::string_view get_file_path_by_arg(const char* string);
-
     ConverterParams create_params(const std::vector<std::string>& command_args);
 };
-
-std::string_view Processor::Impl::get_file_path_by_arg(const char* string){
-    auto file_index = Utils::string_to_positive_number(string);
-
-    if (file_index == 0 || file_index > additional_files_paths.size()){
-        throw Exceptions::IncorrectCommandsParams();
-    }
-
-    return additional_files_paths[file_index - 1];
-}
 
 ConverterParams Processor::Impl::create_params(const std::vector<std::string>& command_args){
     ConverterParams result;
@@ -37,10 +25,13 @@ ConverterParams Processor::Impl::create_params(const std::vector<std::string>& c
     for (const auto& current_arg : command_args){
         if (current_arg[0] == '$'){
             try{
-                // offset by 1 to except '$'
-                std::string_view file_path = get_file_path_by_arg(current_arg.data() + 1);
+                auto index = Utils::string_to_positive_number(current_arg.data() + 1);
 
-                result.push_back(Streams::OutputStream(file_path));
+                if (index == 0 || index > additional_streams.size()){
+                    throw Exceptions::IncorrectCommandsParams();
+                }
+
+                result.push_back(&additional_streams[index - 1]);
             }
             // errors of conversion
             catch(const std::runtime_error&){
@@ -63,16 +54,20 @@ ConverterParams Processor::Impl::create_params(const std::vector<std::string>& c
 Processor::Processor(const std::string_view& config,
                      const std::string_view& out,
                      const std::string_view& in,
-                     const std::vector<std::string_view>& additional_files,
+                     const std::vector<std::string>& additional_files,
                      const ConvertersFactory& factory){
 
     _pimpl = new Impl{
         out,
         in,
-        additional_files,
+        {},
         ConfigParser(config),
         factory,
     };
+
+    for (const auto& file : additional_files){
+        _pimpl->additional_streams.emplace_back(file);
+    }
 }
 
 void Processor::process() const{

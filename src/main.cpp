@@ -39,16 +39,6 @@ std::string get_program_description(const CommandsDescription& commands_descript
     return program_description;
 }
 
-std::vector<std::string_view> get_additional_files(argparse::ArgumentParser& program){
-    auto tmp = program.get<std::vector<std::string>>("additional_files");
-    std::vector<std::string_view> additional_files;
-    for (const auto& x : tmp){
-        additional_files.push_back(x);
-    }
-
-    return additional_files;
-}
-
 int main(int argc, char** argv){
     ConvertersFactory factory;
 
@@ -83,7 +73,7 @@ int main(int argc, char** argv){
         auto input_file = program.get<std::string>("input_file");
 
         // parser can only give std::vector<std::string>, so std::vector<std::string_view> creates
-        auto additional_files = get_additional_files(program);
+        auto additional_files = program.get<std::vector<std::string>>("additional_files");
 
         Processor processor(config_path, output_file, input_file, additional_files, factory);
 

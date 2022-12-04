@@ -6,11 +6,11 @@ WAVFormatInfo::Sample Streams::InputStream::read_element(){
     return _reader.read_sample();
 }
 
-size_t Streams::InputStream::get_duration_s(){
+size_t Streams::InputStream::get_duration_s() const{
     return _reader.get_duration_s();
 }
 
-size_t Streams::InputStream::get_size(){
+size_t Streams::InputStream::get_size() const{
     return _reader.get_samples_count();
 }
 

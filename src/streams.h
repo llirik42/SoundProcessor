@@ -10,9 +10,9 @@ namespace Streams{
 
         WAVFormatInfo::Sample read_element();
 
-        [[nodiscard]] size_t get_duration_s();
+        [[nodiscard]] size_t get_duration_s() const;
 
-        [[nodiscard]] size_t get_size();
+        [[nodiscard]] size_t get_size() const;
 
         [[nodiscard]] bool available() const;
     private:

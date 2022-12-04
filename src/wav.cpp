@@ -210,6 +210,7 @@ void WAVManagement::WAVReader::Impl::read(){
             reinterpret_cast<char*>(&buffer),
             static_cast<std::streamsize>(WAV_READER_BUFFER_SIZE * sizeof(WAVFormatInfo::Sample))
             );
+
 }
 
 WAVManagement::WAVReader::WAVReader(std::string_view file_path){
@@ -231,11 +232,11 @@ WAVManagement::WAVReader::WAVReader(std::string_view file_path){
     _pimpl->read();
 }
 
-size_t WAVManagement::WAVReader::get_duration_s(){
+size_t WAVManagement::WAVReader::get_duration_s() const{
     return _pimpl->duration_s;
 }
 
-size_t WAVManagement::WAVReader::get_samples_count(){
+size_t WAVManagement::WAVReader::get_samples_count() const{
     return _pimpl->total_samples_count;
 }
 

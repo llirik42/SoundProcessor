@@ -10,7 +10,7 @@ public:
             const std::string_view& config,
             const std::string_view& out,
             const std::string_view& in,
-            const std::vector<std::string_view>& additional_files,
+            const std::vector<std::string>& additional_files,
             const ConvertersFactory& factory
             );
     void process() const;

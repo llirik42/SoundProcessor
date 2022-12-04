@@ -29,6 +29,7 @@ add_library(corelib OBJECT
         src/utils.cpp
         src/wav.cpp
 
+        src/converters/converters_utils.cpp
         src/converters/cut_converter.cpp
         src/converters/insert_converter.cpp
         src/converters/mix_converter.cpp

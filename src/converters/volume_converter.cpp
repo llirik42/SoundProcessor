@@ -1,4 +1,5 @@
 #include "../exceptions.h"
+#include "converters_utils.h"
 #include "volume_converter.h"
 
 void convert_volume(
@@ -42,21 +43,19 @@ void RawVolumeConverter::convert(std::string_view command,
     size_t start_time_index = command == "mute" ? 0 : 1;
     size_t end_time_index = command == "mute" ? 1 : 2;
 
-    float coefficient = command == "volume" ? std::any_cast<float>(params[0]) : 0;
+    float coefficient = command == "volume" ? convert_any<float>(params[0]) : 0;
 
-    size_t total_input_stream_size = input_stream.get_size();
-    size_t total_input_stream_duration = input_stream.get_duration_s();
+    auto start_sample = calculate_sample_index_by_time(
+            convert_any<float>(params[start_time_index]),
+            input_stream
+            );
 
-    float tmp = static_cast<float>(total_input_stream_size) /
-                static_cast<float>(total_input_stream_duration);
+    auto end_sample = calculate_sample_index_by_time(
+            convert_any<float>(params[end_time_index]),
+            input_stream
+    );
 
-    auto start_sample = static_cast<size_t>(std::any_cast<float>(params[start_time_index]) * tmp);
-
-    auto end_sample = static_cast<size_t>(std::any_cast<float>(params[end_time_index]) * tmp);
-
-    if (end_sample < start_sample || end_sample >= input_stream.get_size() || start_sample >= input_stream.get_size()){
-        throw Exceptions::IncorrectCommandsParams();
-    }
+    check_time_fragment(start_sample, end_sample, input_stream);
 
     convert_volume(output_stream, input_stream, coefficient, start_sample, end_sample);
 }
