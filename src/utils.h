@@ -1,19 +1,14 @@
 #pragma once
 
 #include <fstream>
-#include <vector>
 #include <string>
-#include <map>
 
-size_t get_file_size(std::ifstream& file);
+size_t get_file_size(std::fstream& file);
 
-bool contains(const std::vector<std::string>& vector, const std::string& string);
+bool is_file_empty(std::fstream& file);
 
-bool is_file_empty(std::ifstream& file);
+std::string generate_random_wav_file_name();
 
-//void write_default_wav_headers(std::ofstream& file, size_t samples_count);
+void copy_file(std::string_view from, std::string_view to);
 
-/*
-void write_sample(std::ofstream& file, Sample sample);
-*/
-void copy_file(const std::string& to, const std::string& from);
+void rename_file(std::string_view old_name, std::string new_name);

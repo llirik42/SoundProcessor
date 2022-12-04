@@ -1,8 +1,9 @@
 #include <algorithm>
+#include <random>
 #include "exceptions.h"
 #include "utils.h"
 
-size_t get_file_size(std::ifstream& file){
+size_t get_file_size(std::fstream& file){
     auto start_pos = file.tellg();
 
     file.seekg(0, std::fstream::end);
@@ -14,66 +15,77 @@ size_t get_file_size(std::ifstream& file){
     return result;
 }
 
-const size_t BUFFER_SIZE = 1024;
-
-bool contains(const std::vector<std::string>& vector, const std::string& string){
-    return std::any_of(
-            vector.begin(),
-            vector.end(),
-            [&](const auto& x){return x == string;}
-    );
-}
-
-bool is_file_empty(std::ifstream& file){
+bool is_file_empty(std::fstream& file){
     return !get_file_size(file);
 }
 
-template<typename T>
-void write_value(std::ofstream& file, T value){
-    file.write(reinterpret_cast<char*>(&value), sizeof(value));
+char digit_to_char(unsigned int digit){
+    return static_cast<char>(digit + '0');
 }
 
-/*
-void write_default_wav_headers(std::ofstream& file, size_t samples_count){
-    static const size_t size_of_min_headers = 44;
-
-    auto file_size = static_cast<uint32_t>(samples_count * SUPPORTED_BLOCK_ALIGN + size_of_min_headers - 8);
-
-    write_value(file, RIFF_ID);
-    write_value(file, file_size);
-    write_value(file, SUPPORTED_RIFF_FORMAT);
-
-    write_value(file, FMT_ID);
-    write_value(file, SUPPORTED_FMT_SUBCHUNK_SIZE);
-    write_value(file, SUPPORTED_FMT_AUDIO_FORMAT);
-    write_value(file, SUPPORTED_NUMBER_OF_CHANNELS);
-    write_value(file, SUPPORTED_SAMPLE_RATE);
-    write_value(file, SUPPORTED_BYTE_RATE);
-    write_value(file, SUPPORTED_BLOCK_ALIGN);
-    write_value(file, SUPPORTED_BITS_PER_SAMPLE);
-
-    write_value(file, DATA_ID);
-    write_value(file, static_cast<uint32_t>(samples_count * 2));
+char generate_random_letter(){
+    static  std::random_device device;
+    static std::mt19937 engine(device());
+    std::uniform_int_distribution<std::mt19937::result_type> distribution(0,51); // size of english alphabet * 2
+    auto value = distribution(engine);
+    auto result = value <= 25 ? value + 'a' : (value - 26) + 'A';
+    return static_cast<char>(result);
 }
-*/
-/*
-void write_sample(std::ofstream& file, Sample sample){
-    write_value(file, sample);
-}*/
 
-void copy_file(const std::string& to, const std::string& from){
-    std::ofstream out(to, std::fstream::binary);
-    std::ifstream in(from, std::fstream::binary);
+char generate_random_digit(){
+    static  std::random_device device;
+    static std::mt19937 engine(device());
+    std::uniform_int_distribution<std::mt19937::result_type> distribution(0,9); // 0, 1, ..., 9
+    return digit_to_char(distribution(engine));
+}
+
+char generate_random_alphanumeric(){
+    static  std::random_device device;
+    static std::mt19937 engine(device());
+    std::uniform_int_distribution<std::mt19937::result_type> distribution(0,1);
+    auto value = distribution(engine);
+    return value ? generate_random_letter() : generate_random_digit();
+}
+
+std::string generate_random_wav_file_name(){
+    static const size_t file_name_length = 128;
+
+    std::string result;
+
+    for (unsigned int i = 0; i < file_name_length; i++){
+        result.append(1, generate_random_alphanumeric());
+    }
+
+    result.append(".wav");
+
+    return result;
+}
+
+void rename_file(std::string_view old_name, std::string new_name){
+    if(std::rename(old_name.data(), new_name.data())){
+        throw Exceptions::IOError();
+    }
+}
+
+void copy_file(std::string_view from, std::string_view to){
+    static const size_t copying_buffer_size = 1024;
+
+    std::ofstream out(to.data(), std::fstream::binary);
+    std::ifstream in(from.data(), std::fstream::binary);
 
     if (!out.is_open() || !in.is_open()){
         throw Exceptions::IOError();
     }
 
-    char buffer[BUFFER_SIZE];
+    char buffer[copying_buffer_size];
 
     while (!in.eof()){
-        in.read(buffer, BUFFER_SIZE);
+        in.read(buffer, copying_buffer_size);
 
         out.write(buffer, in.gcount());
+
+        if (in.fail() || out.fail()){
+            throw Exceptions::IOError();
+        }
     }
 }
