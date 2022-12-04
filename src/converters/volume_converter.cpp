@@ -2,12 +2,11 @@
 #include "converters_utils.h"
 #include "volume_converter.h"
 
-void convert_volume(
-        Streams::OutputStream& output_stream,
-        Streams::InputStream& input_stream,
-        float coefficient,
-        size_t start_sample,
-        size_t end_sample){
+void convert_volume(Streams::OutputStream& output_stream,
+                    Streams::InputStream& input_stream,
+                    float coefficient,
+                    size_t start_sample,
+                    size_t end_sample){
 
     for (size_t i = 0; i < start_sample; i++){
         output_stream.write(input_stream.read_element());

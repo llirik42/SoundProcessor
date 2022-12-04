@@ -4,19 +4,21 @@
 #include <vector>
 #include "converters_factory.h"
 
-class Processor{
-public:
-    Processor(
-            const std::string_view& config,
-            const std::string_view& out,
-            const std::string_view& in,
-            const std::vector<std::string>& additional_files,
-            const ConvertersFactory& factory
-            );
-    void process() const;
+namespace Processing{
+    class Processor{
+    public:
+        Processor(const std::string_view& config,
+                  const std::string_view& out,
+                  const std::string_view& in,
+                  const std::vector<std::string>& additional_files,
+                  const ConvertersFactory& factory);
 
-    ~Processor();
-private:
-    struct Impl;
-    Impl* _pimpl;
-};
+        void process() const;
+
+        ~Processor();
+    private:
+        struct Impl;
+        Impl* _pimpl;
+    };
+
+}

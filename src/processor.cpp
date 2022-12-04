@@ -5,7 +5,9 @@
 #include "processor.h"
 #include "config_parser.h"
 
-struct Processor::Impl{
+const char FILE_INDEX_SYMBOL = '$';
+
+struct Processing::Processor::Impl{
     std::string_view output_file_path;
 
     std::string_view input_file_path;
@@ -19,11 +21,11 @@ struct Processor::Impl{
     ConverterParams create_params(const std::vector<std::string>& command_args);
 };
 
-ConverterParams Processor::Impl::create_params(const std::vector<std::string>& command_args){
+ConverterParams Processing::Processor::Impl::create_params(const std::vector<std::string>& command_args){
     ConverterParams result;
 
     for (const auto& current_arg : command_args){
-        if (current_arg[0] == '$'){
+        if (current_arg[0] == FILE_INDEX_SYMBOL){
             try{
                 auto index = Utils::string_to_positive_number(current_arg.data() + 1);
 
@@ -51,29 +53,27 @@ ConverterParams Processor::Impl::create_params(const std::vector<std::string>& c
     return result;
 }
 
-Processor::Processor(const std::string_view& config,
-                     const std::string_view& out,
-                     const std::string_view& in,
-                     const std::vector<std::string>& additional_files,
-                     const ConvertersFactory& factory){
+Processing::Processor::Processor(const std::string_view& config,
+                                 const std::string_view& out,
+                                 const std::string_view& in,
+                                 const std::vector<std::string>& additional_files,
+                                 const ConvertersFactory& factory){
 
     // For validation
     WAVManagement::WAVParser::parse(in);
 
-    _pimpl = new Impl{
-        out,
-        in,
-        {},
-        ConfigParser(config),
-        factory,
-    };
+    _pimpl = new Impl{out,
+                      in,
+                      {},
+                      ConfigParser(config),
+                      factory};
 
     for (const auto& file : additional_files){
         _pimpl->additional_streams.emplace_back(file);
     }
 }
 
-void Processor::process() const{
+void Processing::Processor::process() const{
     std::string tmp_path_1 = Utils::generate_random_wav_file_name();
     std::string tmp_path_2 = Utils::generate_random_wav_file_name();
 
@@ -116,6 +116,6 @@ void Processor::process() const{
     Utils::rename_file(current_input_path, _pimpl->output_file_path);
 }
 
-Processor::~Processor(){
+Processing::Processor::~Processor(){
     delete _pimpl;
 }

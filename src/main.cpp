@@ -75,7 +75,7 @@ int main(int argc, char** argv){
         // parser can only give std::vector<std::string>, so std::vector<std::string_view> creates
         auto additional_files = program.get<std::vector<std::string>>("additional_files");
 
-        Processor processor(config_path, output_file, input_file, additional_files, factory);
+        Processing::Processor processor(config_path, output_file, input_file, additional_files, factory);
 
         processor.process();
     }

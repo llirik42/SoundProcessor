@@ -2,13 +2,12 @@
 #include "converters_utils.h"
 #include "insert_converter.h"
 
-void insert(
-        Streams::OutputStream& output_stream,
-        Streams::InputStream& input_stream,
-        Streams::InputStream& additional_stream,
-        size_t insert_place,
-        size_t start_place,
-        size_t end_place){
+void insert(Streams::OutputStream& output_stream,
+            Streams::InputStream& input_stream,
+            Streams::InputStream& additional_stream,
+            size_t insert_place,
+            size_t start_place,
+            size_t end_place){
 
     additional_stream.skip(0, start_place);
 
@@ -39,8 +38,7 @@ void RawInsertConverter::convert(std::string_view command,
     size_t insert_place;
 
     if (command == "insert"){
-        insert_place = calculate_sample_index_by_time(
-                convert_any<float>(params[1]),
+        insert_place = calculate_sample_index_by_time(convert_any<float>(params[1]),
                 input_stream);
     }
 
@@ -49,31 +47,27 @@ void RawInsertConverter::convert(std::string_view command,
     }
 
     if (command == "back"){
-        insert_place = calculate_sample_index_by_time(
-                input_stream.get_duration_s(),
-                input_stream);
+        insert_place = calculate_sample_index_by_time(input_stream.get_duration_s(),
+                                                      input_stream);
     }
 
     size_t index1 = command == "insert" ? 2 : 1;
     size_t index2 = command == "insert" ? 3 : 2;
 
-    auto start_place = calculate_sample_index_by_time(
-            convert_any<float>(params[index1]),
+    auto start_place = calculate_sample_index_by_time(convert_any<float>(params[index1]),
             input_stream);
 
-    auto end_place = calculate_sample_index_by_time(
-            convert_any<float>(params[index2]),
+    auto end_place = calculate_sample_index_by_time(convert_any<float>(params[index2]),
             input_stream);
 
     check_time_fragment(start_place, end_place, additional_stream);
     size_t end_in_input_file = insert_place + end_place - start_place;
     check_time_fragment(insert_place, end_in_input_file, input_stream);
 
-    insert(
-            output_stream,
-            input_stream,
-            additional_stream,
-            insert_place,
-            start_place,
-            end_place);
+    insert(output_stream,
+           input_stream,
+           additional_stream,
+           insert_place,
+           start_place,
+           end_place);
 }

@@ -14,12 +14,10 @@ using ConverterParams = std::vector<std::any>;
 
 class RawAbstractConverter{
 public:
-    virtual void convert(
-            std::string_view command,
-            Streams::OutputStream& output_stream,
-            Streams::InputStream& input_stream,
-            const ConverterParams& params
-            ) const = 0;
+    virtual void convert(std::string_view command,
+                         Streams::OutputStream& output_stream,
+                         Streams::InputStream& input_stream,
+                         const ConverterParams& params) const = 0;
 
     virtual ~RawAbstractConverter() = default;
 };

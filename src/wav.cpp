@@ -216,11 +216,8 @@ void WAVManagement::WAVReader::Impl::skip(size_t count){
 }
 
 void WAVManagement::WAVReader::Impl::read(){
-    ifstream.read(
-            reinterpret_cast<char*>(&buffer),
-            static_cast<std::streamsize>(WAV_READER_BUFFER_SIZE * sizeof(WAVFormatInfo::Sample))
-            );
-
+    ifstream.read(reinterpret_cast<char*>(&buffer),
+                  static_cast<std::streamsize>(WAV_READER_BUFFER_SIZE * sizeof(WAVFormatInfo::Sample)));
 }
 
 WAVManagement::WAVReader::WAVReader(std::string_view file_path){
@@ -228,14 +225,12 @@ WAVManagement::WAVReader::WAVReader(std::string_view file_path){
 
     WAVManagement::WAVInfo info = parser.parse(file_path);
 
-    _pimpl = new Impl{
-            {},
-            0,
-            0,
-            info.duration_s,
-            info.samples_count,
-            std::ifstream(file_path.data(), std::fstream::binary),
-    };
+    _pimpl = new Impl{{},
+                      0,
+                      0,
+                      info.duration_s,
+                      info.samples_count,
+                      std::ifstream(file_path.data(), std::fstream::binary)};
 
     _pimpl->ifstream.seekg(info.data_start_position);
 
@@ -293,10 +288,8 @@ struct WAVManagement::WAVWriter::Impl{
 };
 
 void WAVManagement::WAVWriter::Impl::dump_buffer(){
-    ofstream.write(
-            reinterpret_cast<char*>(&buffer),
-            static_cast<std::streamsize>(elements_in_buffer_count * sizeof(WAVFormatInfo::Sample))
-            );
+    ofstream.write(reinterpret_cast<char*>(&buffer),
+                   static_cast<std::streamsize>(elements_in_buffer_count * sizeof(WAVFormatInfo::Sample)));
 
     index_in_buffer = 0;
     elements_in_buffer_count = 0;
@@ -358,13 +351,11 @@ void WAVManagement::WAVWriter::Impl::replace_samples_count_in_file(){
 }
 
 WAVManagement::WAVWriter::WAVWriter(std::string_view file_path){
-    _pimpl = new Impl{
-            {},
-            0,
-            0,
-            std::ofstream(file_path.data(), std::fstream::binary),
-            0
-    };
+    _pimpl = new Impl{{},
+                      0,
+                      0,
+                      std::ofstream(file_path.data(), std::fstream::binary),
+                      0};
 
     // just some random value that will be replaced with correct one in the end
     _pimpl->write_default_wav_header(0);
