@@ -10,6 +10,10 @@ namespace Streams{
 
         WAVFormatInfo::Sample read_element();
 
+        void skip(size_t count);
+
+        void skip(size_t start_sample, size_t end_sample);
+
         [[nodiscard]] size_t get_duration_s() const;
 
         [[nodiscard]] size_t get_size() const;

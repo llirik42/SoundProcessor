@@ -14,7 +14,8 @@ void convert_volume(
     }
 
     for (size_t i = start_sample; i < end_sample; i++){
-        auto new_value = static_cast<WAVFormatInfo::Sample>(static_cast<float>(input_stream.read_element()) * coefficient);
+        auto tmp = static_cast<float>(input_stream.read_element());
+        auto new_value = static_cast<WAVFormatInfo::Sample>(tmp * coefficient);
         output_stream.write(new_value);
     }
 

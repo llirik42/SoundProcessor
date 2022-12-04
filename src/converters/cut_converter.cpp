@@ -11,9 +11,7 @@ void cut(Streams::OutputStream& output_stream,
         output_stream.write(input_stream.read_element());
     }
 
-    for (size_t i = start_sample; i < end_sample; i++){
-        input_stream.read_element();
-    }
+    input_stream.skip(start_sample, end_sample);
 
     while (input_stream.available()){
         output_stream.write(input_stream.read_element());

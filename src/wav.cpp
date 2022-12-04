@@ -181,6 +181,8 @@ struct WAVManagement::WAVReader::Impl{
     bool available() const;
 
     [[nodiscard]] WAVFormatInfo::Sample get_sample();
+
+    void skip(size_t count);
 };
 
 void WAVManagement::WAVReader::Impl::move(){
@@ -203,6 +205,12 @@ WAVFormatInfo::Sample WAVManagement::WAVReader::Impl::get_sample(){
     move();
 
     return result;
+}
+
+void WAVManagement::WAVReader::Impl::skip(size_t count){
+    for (unsigned int i = 0; i < count; i++){
+        move();
+    }
 }
 
 void WAVManagement::WAVReader::Impl::read(){
@@ -242,6 +250,14 @@ size_t WAVManagement::WAVReader::get_samples_count() const{
 
 WAVFormatInfo::Sample WAVManagement::WAVReader::read_sample(){
     return _pimpl->get_sample();
+}
+
+void WAVManagement::WAVReader::skip(size_t count){
+    _pimpl->skip(count);
+}
+
+void WAVManagement::WAVReader::skip(size_t start_sample, size_t end_sample){
+    _pimpl->skip(end_sample - start_sample);
 }
 
 bool WAVManagement::WAVReader::available() const{

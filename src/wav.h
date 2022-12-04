@@ -46,6 +46,10 @@ namespace WAVManagement{
 
         [[nodiscard]] WAVFormatInfo::Sample read_sample();
 
+        void skip(size_t count);
+
+        void skip(size_t start_sample, size_t end_sample);
+
         [[nodiscard]] bool available() const;
 
         ~WAVReader();
