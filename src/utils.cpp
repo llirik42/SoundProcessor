@@ -6,6 +6,10 @@ char digit_to_char(unsigned int digit){
     return static_cast<char>(digit + '0');
 }
 
+size_t char_to_digit(char c){
+    return static_cast<size_t>(c - '0');
+}
+
 char generate_random_letter(){
     static std::random_device device;
     static std::mt19937 engine(device());
@@ -60,12 +64,6 @@ std::string Utils::generate_random_wav_file_name(){
     return result;
 }
 
-void Utils::rename_file(std::string_view old_name, std::string_view new_name){
-    if(std::rename(old_name.data(), new_name.data())){
-        throw Exceptions::IOError();
-    }
-}
-
 void Utils::copy_file(std::string_view from, std::string_view to){
     static const size_t copying_buffer_size = 1024;
 
@@ -82,9 +80,39 @@ void Utils::copy_file(std::string_view from, std::string_view to){
         in.read(buffer, copying_buffer_size);
 
         out.write(buffer, in.gcount());
-
-        if (in.fail() || out.fail()){
-            throw Exceptions::IOError();
-        }
     }
+}
+
+void Utils::rename_file(std::string_view old_name, std::string_view new_name){
+    if(std::rename(old_name.data(), new_name.data())){
+        throw Exceptions::IOError();
+    }
+}
+
+void Utils::remove_file(std::string_view file_path){
+    try{
+        std::remove(file_path.data());
+    }
+    catch(...){
+        throw Exceptions::IOError();
+    }
+}
+
+size_t Utils::string_to_positive_number(std::string_view string){
+    size_t result = 0;
+
+    if (string[0] == '0' && string.size() != 1){
+        throw std::runtime_error("Conversion error");
+    }
+
+
+    for (const auto& c : string){
+        if (!std::isdigit(c)){
+            throw std::runtime_error("Conversion error");
+        }
+
+        result = result * 10 + char_to_digit(c);
+    }
+
+    return result;
 }

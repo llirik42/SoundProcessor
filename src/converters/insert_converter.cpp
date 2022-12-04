@@ -2,6 +2,9 @@
 
 #include <iostream>
 
-void RawInsertConverter::convert([[maybe_unused]] const std::string& command, [[maybe_unused]] const ConverterParams& params) const{
+void RawInsertConverter::convert(std::string_view command,
+                                 Streams::OutputStream& output_stream,
+                                 Streams::InputStream& input_stream,
+                                 const ConverterParams& params) const{
     std::cout << "Inserter!\n";
 }

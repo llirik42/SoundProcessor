@@ -1,25 +1,30 @@
 #pragma once
 
+#include <string>
 #include "wav.h"
 
 namespace Streams{
     class InputStream{
     public:
-        explicit InputStream(WAVManagement::WAVReader& reader);
+        explicit InputStream(std::string_view file_path);
 
-        [[nodiscard]] WAVFormatInfo::Sample get_element();
+        WAVFormatInfo::Sample read_element();
+
+        [[nodiscard]] size_t get_duration_s();
+
+        [[nodiscard]] size_t get_size();
 
         [[nodiscard]] bool available() const;
     private:
-        WAVManagement::WAVReader& _reader;
+        WAVManagement::WAVReader _reader;
     };
 
     class OutputStream{
     public:
-        explicit OutputStream(WAVManagement::WARWriter& writer);
+        explicit OutputStream(std::string_view file_path);
 
         void write(WAVFormatInfo::Sample sample);
     private:
-        WAVManagement::WARWriter& _writer;
+        WAVManagement::WAVWriter _writer;
     };
 }

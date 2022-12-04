@@ -49,5 +49,4 @@ namespace Exceptions{
         [[nodiscard]] const char* what() const noexcept override {return "IO error";}
         [[nodiscard]] int code() const noexcept override {return IO_ERROR_CODE;}
     };
-
 }

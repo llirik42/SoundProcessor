@@ -40,7 +40,11 @@ namespace WAVManagement{
     public:
         explicit WAVReader(std::string_view file_path);
 
-        [[nodiscard]] WAVFormatInfo::Sample get_sample();
+        [[nodiscard]] size_t get_duration_s();
+
+        [[nodiscard]] size_t get_samples_count();
+
+        [[nodiscard]] WAVFormatInfo::Sample read_sample();
 
         [[nodiscard]] bool available() const;
 
@@ -50,15 +54,17 @@ namespace WAVManagement{
         Impl* _pimpl;
     };
 
-    class WARWriter{
+    class WAVWriter{
     public:
-        explicit WARWriter(std::string_view file_path, size_t samples_count);
+        explicit WAVWriter(std::string_view file_path);
 
         void write_sample(WAVFormatInfo::Sample sample);
 
-        ~WARWriter();
+        ~WAVWriter();
     private:
         struct Impl;
         Impl* _pimpl;
     };
+
+    size_t get_sample_number_by_time(size_t time_s);
 }

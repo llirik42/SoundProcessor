@@ -1,84 +1,62 @@
-#include "../utils.h"
 #include "../exceptions.h"
 #include "volume_converter.h"
 
-/*
-void convert_volume(std::ofstream& output, WAVFile& input, float volume_coefficient, size_t start_sample, size_t stop_sample){
-    write_default_wav_headers(output, input.get_samples_count());
+void convert_volume(
+        Streams::OutputStream& output_stream,
+        Streams::InputStream& input_stream,
+        float coefficient,
+        size_t start_sample,
+        size_t end_sample){
 
-    for (size_t i = 0; i < input.get_samples_count(); i++){
-        Sample sample = input.get_sample();
+    for (size_t i = 0; i < start_sample; i++){
+        output_stream.write(input_stream.read_element());
+    }
 
-        if (start_sample <= i && i <= stop_sample){
-            sample = static_cast<Sample>(static_cast<float>(sample) * volume_coefficient);
-        }
+    for (size_t i = start_sample; i < end_sample; i++){
+        auto new_value = static_cast<WAVFormatInfo::Sample>(static_cast<float>(input_stream.read_element()) * coefficient);
+        output_stream.write(new_value);
+    }
 
-        write_sample(output, sample);
+    while (input_stream.available()){
+        output_stream.write(input_stream.read_element());
     }
 }
-*/
-void RawVolumeConverter::convert([[maybe_unused]] const std::string& command, [[maybe_unused]] const ConverterParams& params) const{
-    /*
-    ConverterParams new_params = params;
 
-    if (command == "mute"){
-        new_params.insert(new_params.begin() + 2, "0");
+void RawVolumeConverter::convert(std::string_view command,
+                                 Streams::OutputStream& output_stream,
+                                 Streams::InputStream& input_stream,
+                                 const ConverterParams& params) const{
+
+    if (command != "mute" && command != "volume"){
+        throw Exceptions::IncorrectCommandsParams();
     }
 
-    if (new_params.size() != 3 && new_params.size() != 5){
-        throw IncorrectCommandsParams();
+    if (command == "mute" && params.size() != 2){
+        throw Exceptions::IncorrectCommandsParams();
     }
 
-    std::ofstream output_file(new_params[0], std::fstream::binary);
-    if (!output_file.is_open()){
-        throw IOError();
+    if (command == "volume" && params.size() != 3){
+        throw Exceptions::IncorrectCommandsParams();
     }
 
-    WAVFile input_file(new_params[1]);
+    size_t start_time_index = command == "mute" ? 0 : 1;
+    size_t end_time_index = command == "mute" ? 1 : 2;
 
-    size_t start_seconds = 0;
-    size_t stop_seconds = input_file.get_duration_s();
+    float coefficient = command == "volume" ? std::any_cast<float>(params[0]) : 0;
 
-    float volume_coefficient;
+    size_t total_input_stream_size = input_stream.get_size();
+    size_t total_input_stream_duration = input_stream.get_duration_s();
 
-    try{
-        volume_coefficient = std::stof(new_params[2]);
+    float tmp = static_cast<float>(total_input_stream_size) /
+                static_cast<float>(total_input_stream_duration);
 
-        if (new_params.size() == 5){
-            if (new_params[3] != "<-"){
-                int tmp = std::stoi(new_params[3]);
+    auto start_sample = static_cast<size_t>(std::any_cast<float>(params[start_time_index]) * tmp);
 
-                if (tmp < 0){
-                    throw IncorrectCommandsParams();
-                }
+    auto end_sample = static_cast<size_t>(std::any_cast<float>(params[end_time_index]) * tmp);
 
-                start_seconds = static_cast<size_t>(tmp);
-            }
-
-            if (new_params[4] != "->"){
-                int tmp = std::stoi(new_params[4]);
-
-                if (tmp < 0){
-                    throw IncorrectCommandsParams();
-                }
-
-                stop_seconds = static_cast<size_t>(tmp);
-            }
-        }
-    }
-    catch(...){
-        throw IncorrectCommandsParams();
+    if (end_sample < start_sample || end_sample >= input_stream.get_size() || start_sample >= input_stream.get_size()){
+        throw Exceptions::IncorrectCommandsParams();
     }
 
-    if (volume_coefficient < 0 || start_seconds >= stop_seconds || stop_seconds > input_file.get_duration_s()){
-        throw IncorrectCommandsParams();
-    }
-
-    convert_volume(
-            output_file,
-            input_file,
-            volume_coefficient,
-            start_seconds * SUPPORTED_SAMPLE_RATE,
-            stop_seconds * SUPPORTED_SAMPLE_RATE
-            );*/
+    convert_volume(output_stream, input_stream, coefficient, start_sample, end_sample);
 }

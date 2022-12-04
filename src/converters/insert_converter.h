@@ -4,7 +4,10 @@
 
 class RawInsertConverter : public RawAbstractConverter{
 public:
-    void convert(const std::string& command, const ConverterParams& params) const override;
+    void convert(std::string_view command,
+                 Streams::OutputStream& output_stream,
+                 Streams::InputStream& input_stream,
+                 const ConverterParams& params) const override;
 
     ~RawInsertConverter() override = default;
 };

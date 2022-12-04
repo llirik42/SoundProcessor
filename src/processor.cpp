@@ -1,102 +1,69 @@
-#include <map>
-#include <algorithm>
+#include <filesystem>
+#include "streams.h"
 #include "exceptions.h"
 #include "utils.h"
 #include "processor.h"
 #include "config_parser.h"
 
-// {Commands of converter} -> converter
-using ConvertersMap = std::map<std::vector<std::string>, Converter>;
-
-// Creates map where every converter will be nullptr
-ConvertersMap create_converters_map(const ConvertersInfo& converters_info){
-    ConvertersMap result;
-
-    for (const auto& [converter_name, description_commands] : converters_info){
-        const auto& [description, commands] = description_commands;
-        result[commands] = nullptr;
-    }
-
-    return result;
-}
-
 struct Processor::Impl{
-    std::string output_file_path;
+    std::string_view output_file_path;
 
-    std::string input_file_path;
+    std::string_view input_file_path;
 
-    std::vector<std::string> additional_files_paths;
+    std::vector<std::string_view> additional_files_paths;
 
     ConfigParser config_parser;
 
     const ConvertersFactory& factory;
 
-    ConvertersMap converters_map;
+    std::string_view get_file_path_by_arg(const char* string);
 
-    // fill map of converters according to config (create only needed converters)
-    void prepare_converters(){
-        const ConvertersInfo& converters_info = factory.get_converters_info();
-
-        converters_map = create_converters_map(converters_info);
-
-        for (const auto& [command_name, command_args]: config_parser){
-
-            bool found_converter = false; // whether converter for this command was found or not
-            for (auto& [converter_commands, converter]: converters_map){
-                if (contains(converter_commands, command_name)){
-                    found_converter = true;
-
-                    if (converter == nullptr){
-                        converter = factory.create_converter(command_name);
-                    }
-
-                    break;
-                }
-            }
-
-            // Met unknown command
-            if (!found_converter){
-                throw Exceptions::UnknownCommandError();
-            }
-        }
-    }
-
-    const Converter& find_converter_by_single_command(const std::string& command_name){
-        for (const auto& [commands_vector, converter] : converters_map){
-            if (contains(commands_vector, command_name)){
-                return converter;
-            }
-        }
-
-        // It's impossible that there will be no converter for command, because then command is incorrect
-        // and was thrown away while preparing converters
-        return converters_map[{}];
-    }
-
-    void replace_params(ConverterParams& params){
-        for (auto& param : params){
-            if (param[0] == '$'){
-                try{
-                    auto file_index = static_cast<size_t>(strtoul(param.c_str() + 1, nullptr, 10));
-
-                    if (file_index == 0 || file_index > additional_files_paths.size()){
-                        throw Exceptions::IncorrectCommandsParams();
-                    }
-
-                    param = additional_files_paths[file_index - 1];
-                }
-                catch(...){
-                    throw Exceptions::IncorrectCommandsParams();
-                }
-            }
-        }
-    }
+    ConverterParams create_params(const std::vector<std::string>& command_args);
 };
 
-Processor::Processor(const string& config,
-                     const string& out,
-                     const string& in,
-                     const std::vector<string>& additional_files,
+std::string_view Processor::Impl::get_file_path_by_arg(const char* string){
+    auto file_index = Utils::string_to_positive_number(string);
+
+    if (file_index == 0 || file_index > additional_files_paths.size()){
+        throw Exceptions::IncorrectCommandsParams();
+    }
+
+    return additional_files_paths[file_index - 1];
+}
+
+ConverterParams Processor::Impl::create_params(const std::vector<std::string>& command_args){
+    ConverterParams result;
+
+    for (const auto& current_arg : command_args){
+        if (current_arg[0] == '$'){
+            try{
+                // offset by 1 to except '$'
+                std::string_view file_path = get_file_path_by_arg(current_arg.data() + 1);
+
+                result.push_back(Streams::OutputStream(file_path));
+            }
+            // errors of conversion
+            catch(const std::runtime_error&){
+                throw Exceptions::IncorrectCommandsParams();
+            }
+        }
+        else{
+            try{
+                result.push_back(std::stof(current_arg));
+            }
+            catch(...){
+                throw Exceptions::IncorrectCommandsParams();
+            }
+        }
+    }
+
+    return result;
+}
+
+Processor::Processor(const std::string_view& config,
+                     const std::string_view& out,
+                     const std::string_view& in,
+                     const std::vector<std::string_view>& additional_files,
                      const ConvertersFactory& factory){
 
     _pimpl = new Impl{
@@ -105,47 +72,50 @@ Processor::Processor(const string& config,
         additional_files,
         ConfigParser(config),
         factory,
-        {},
     };
-
-    _pimpl->prepare_converters();
 }
 
 void Processor::process() const{
-    std::string path_of_tmp1 = "tmp1.wav";
-    std::string path_of_tmp2 = "tmp2.wav";
+    std::string tmp_path_1 = Utils::generate_random_wav_file_name();
+    std::string tmp_path_2 = Utils::generate_random_wav_file_name();
 
-    copy_file(path_of_tmp1, _pimpl->input_file_path);
+    std::string_view current_input_path = tmp_path_1;
+    std::string_view current_output_path = tmp_path_2;
 
-    std::string path_of_final_output = path_of_tmp2;
+    Utils::copy_file(_pimpl->input_file_path, tmp_path_1);
 
     for (const auto& [command_name, command_args] : _pimpl->config_parser){
-        ConverterParams params;
+        try{
+            const Converter& current_converter = _pimpl->factory.create_converter(command_name);
 
-        std::copy(command_args.begin(), command_args.end(),
-                  std::back_inserter(params));
+            auto current_params = _pimpl->create_params(command_args);
 
-        _pimpl->replace_params(params);
+            Streams::InputStream input_stream(current_input_path);
+            Streams::OutputStream output_stream(current_output_path);
 
-        params.insert(params.begin(), path_of_tmp1);
-        params.insert(params.begin(), path_of_tmp2);
+            current_converter->convert(
+                    command_name,
+                    output_stream,
+                    input_stream,
+                    current_params
+            );
 
-        _pimpl->find_converter_by_single_command(command_name)->convert(command_name, params);
-
-        path_of_final_output = path_of_tmp2;
-
-        std::swap(path_of_tmp1, path_of_tmp2);
+            std::swap(current_input_path, current_output_path);
+        }
+        catch(...){
+            Utils::remove_file(current_input_path);
+            Utils::remove_file(current_output_path);
+            throw;
+        }
     }
 
-    copy_file(_pimpl->output_file_path, path_of_final_output);
+    Utils::remove_file(current_output_path);
 
-    try{
-        std::remove(path_of_tmp1.c_str());
-        std::remove(path_of_tmp2.c_str());
+    if (std::filesystem::exists(_pimpl->output_file_path)){
+        Utils::remove_file(_pimpl->output_file_path);
     }
-    catch(...){
-        throw Exceptions::IOError();
-    }
+
+    Utils::rename_file(current_input_path, _pimpl->output_file_path);
 }
 
 Processor::~Processor(){

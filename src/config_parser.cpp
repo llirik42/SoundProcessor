@@ -26,15 +26,23 @@ Command extract_command(std::string& command_string){
         command_string.push_back(' ');
     }
 
+    size_t counter = 0;
+
     size_t pos;
     while ((pos = command_string.find(delimiter)) != std::string::npos){
-        result.command_args.push_back(command_string.substr(0, pos));
-        command_string.erase(0, pos + delimiter.length());
+        auto current_token = command_string.substr(0, pos);
+
+        if (counter == 0){
+            result.command_name = current_token;
+        }
+        else{
+            result.command_args.push_back(current_token);
+        }
+
+        counter++;
+
+        command_string.erase(0, pos + delimiter.size());
     }
-
-    result.command_name = result.command_args.front();
-
-    result.command_args.erase(result.command_args.begin());
 
     return result;
 }
@@ -54,22 +62,25 @@ Command parse_command(std::string& command_string){
 struct ConfigParser::Impl{
     std::vector<Command> commands;
 
-    void Parse(std::ifstream& config_file){
-        while (!config_file.eof()){
-            std::string command_string;
-            std::getline(config_file, command_string);
-
-            const Command current_command = parse_command(command_string);
-
-            // Current string's without #
-            if (!current_command.command_name.empty()){
-                commands.push_back(current_command);
-            }
-        }
-    }
+    void parse(std::ifstream& config_file);
 };
 
-ConfigParser::ConfigParser(const std::string_view& config_path){
+void ConfigParser::Impl::parse(std::ifstream& config_file){
+    while (!config_file.eof()){
+        std::string command_string;
+
+        std::getline(config_file, command_string);
+
+        const Command current_command = parse_command(command_string);
+
+        // Current string's without #
+        if (!current_command.command_name.empty()){
+            commands.push_back(current_command);
+        }
+    }
+}
+
+ConfigParser::ConfigParser(std::string_view config_path){
     _pimpl = new Impl;
 
     std::ifstream config_file(config_path.data());
@@ -78,7 +89,7 @@ ConfigParser::ConfigParser(const std::string_view& config_path){
         throw Exceptions::IncorrectConfigError();
     }
 
-    _pimpl->Parse(config_file);
+    _pimpl->parse(config_file);
 }
 
 ConfigParser::ConfigParserIterator ConfigParser::begin() const{

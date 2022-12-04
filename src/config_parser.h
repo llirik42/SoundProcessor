@@ -12,7 +12,7 @@ class ConfigParser{
 public:
     using ConfigParserIterator = std::vector<Command>::const_iterator;
 
-    explicit ConfigParser(const std::string_view& config_path);
+    explicit ConfigParser(std::string_view config_path);
 
     [[nodiscard]] ConfigParserIterator begin() const;
 

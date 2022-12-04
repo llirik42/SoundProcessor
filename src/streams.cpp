@@ -1,16 +1,24 @@
 #include "streams.h"
 
-Streams::InputStream::InputStream(WAVManagement::WAVReader& reader): _reader(reader) {}
+Streams::InputStream::InputStream(std::string_view file_path): _reader(WAVManagement::WAVReader(file_path)) {}
 
-WAVFormatInfo::Sample Streams::InputStream::get_element(){
-    return _reader.get_sample();
+WAVFormatInfo::Sample Streams::InputStream::read_element(){
+    return _reader.read_sample();
+}
+
+size_t Streams::InputStream::get_duration_s(){
+    return _reader.get_duration_s();
+}
+
+size_t Streams::InputStream::get_size(){
+    return _reader.get_samples_count();
 }
 
 bool Streams::InputStream::available() const{
     return _reader.available();
 }
 
-Streams::OutputStream::OutputStream(WAVManagement::WARWriter& writer): _writer(writer) {}
+Streams::OutputStream::OutputStream(std::string_view file_path): _writer(WAVManagement::WAVWriter(file_path)) {}
 
 void Streams::OutputStream::write(WAVFormatInfo::Sample sample){
     _writer.write_sample(sample);

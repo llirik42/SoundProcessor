@@ -15,6 +15,10 @@ namespace Utils{
 
     void rename_file(std::string_view old_name, std::string_view new_name);
 
+    void remove_file(std::string_view file_path);
+
+    size_t string_to_positive_number(std::string_view string);
+
     template<typename T1, typename T2>
     bool contains(const std::map<T1, T2>& map, const T1& value){
         return map.find(value)->first == value;

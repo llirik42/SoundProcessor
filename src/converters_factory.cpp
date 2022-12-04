@@ -15,10 +15,10 @@ struct ConvertersFactory::Impl{
 
     CommandsDescription commands_description;
 
-    Converter find_converter_by_command_name(std::string_view command_name);
+    Converter create_converter_by_command(std::string_view command_name);
 };
 
-Converter ConvertersFactory::Impl::find_converter_by_command_name(std::string_view command_name){
+Converter ConvertersFactory::Impl::create_converter_by_command(std::string_view command_name){
     for (const auto& [current_command, info] : commands_full_info){
         if (current_command == command_name){
             return info.converter_creation();
@@ -38,43 +38,43 @@ ConvertersFactory::ConvertersFactory(){
 
     _pimpl->commands_full_info["mute"] = {
             "mutes fragment of file",
-            {"mute <input_file> <place_in_file>"},
+            {"mute <place_in_file>"},
             create<RawVolumeConverter>
     };
 
     _pimpl->commands_full_info["volume"] = {
             "sets certain level of volume in fragment of file with coefficient",
-            {"volume <input_file> <coefficient> <place_in_file>"},
+            {"volume <coefficient> <place_in_file>"},
             create<RawVolumeConverter>
     };
 
     _pimpl->commands_full_info["mix"] = {
             "mixes two files",
-            {"<input_file_1> <input_file_2> <place_in_file_1> <place_in_file_2>"},
+            {"<additional_file> <place_in_input_file> <place_in_additional_files>"},
             create<RawMixConverter>
     };
 
     _pimpl->commands_full_info["cut"] = {
             "removes fragment of file",
-            {"<input_file> <place_in_file>"},
+            {"<place_in_file>"},
             create<RawCutConverter>
     };
 
     _pimpl->commands_full_info["front"] = {
             "Appends fragment of file (file2) to other one (file1)",
-            {"<input_file_1> <input_file_2> <place_in_file_2>"},
+            {"<additional_file> <place_in_additional_file>"},
             create<RawInsertConverter>
     };
 
     _pimpl->commands_full_info["back"] = {
             "inserts at the beginning fragment of file (file2) to other one (file1)",
-            {"<input_file_1> <input_file_2> <place_in_file_2>"},
+            {"<additional_file> <place_in_additional_file>"},
             create<RawInsertConverter>
     };
 
     _pimpl->commands_full_info["insert"] = {
             "inserts fragment of file (file2) to certain place of other one (file1)",
-            {"<input_file_1> <input_file_2> <place_in_file_1> <place_in_file_2>"},
+            {"<additional_file> <place_in_input_file> <place_in_additional_file>"},
             create<RawInsertConverter>
     };
 
@@ -87,7 +87,7 @@ const Converter& ConvertersFactory::create_converter(std::string_view command_na
     static std::map<std::string_view, Converter> converters;
 
     if (!Utils::contains(converters, command_name)){
-        converters[command_name] = _pimpl->find_converter_by_command_name(command_name);
+        converters[command_name] = _pimpl->create_converter_by_command(command_name);
     }
 
     return converters.at(command_name);

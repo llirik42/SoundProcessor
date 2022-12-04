@@ -4,15 +4,13 @@
 #include <vector>
 #include "converters_factory.h"
 
-using std::string;
-
 class Processor{
 public:
     Processor(
-            const string& config,
-            const string& out,
-            const string& in,
-            const std::vector<string>& additional_files,
+            const std::string_view& config,
+            const std::string_view& out,
+            const std::string_view& in,
+            const std::vector<std::string_view>& additional_files,
             const ConvertersFactory& factory
             );
     void process() const;
@@ -20,6 +18,5 @@ public:
     ~Processor();
 private:
     struct Impl;
-
     Impl* _pimpl;
 };
