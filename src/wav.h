@@ -37,10 +37,28 @@ namespace WAVManagement{
     };
 
     class WAVReader{
+    public:
+        explicit WAVReader(std::string_view file_path);
 
+        [[nodiscard]] WAVFormatInfo::Sample get_sample();
+
+        [[nodiscard]] bool available() const;
+
+        ~WAVReader();
+    private:
+        struct Impl;
+        Impl* _pimpl;
     };
 
     class WARWriter{
+    public:
+        explicit WARWriter(std::string_view file_path, size_t samples_count);
 
+        void write_sample(WAVFormatInfo::Sample sample);
+
+        ~WARWriter();
+    private:
+        struct Impl;
+        Impl* _pimpl;
     };
 }

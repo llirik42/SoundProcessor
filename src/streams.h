@@ -10,20 +10,16 @@ namespace Streams{
         [[nodiscard]] WAVFormatInfo::Sample get_element();
 
         [[nodiscard]] bool available() const;
-
-        ~InputStream();
     private:
-        struct Impl;
-        Impl* _pimpl;
+        WAVManagement::WAVReader& _reader;
     };
 
     class OutputStream{
     public:
         explicit OutputStream(WAVManagement::WARWriter& writer);
 
-        ~OutputStream();
+        void write(WAVFormatInfo::Sample sample);
     private:
-        struct Impl;
-        Impl* _pimpl;
+        WAVManagement::WARWriter& _writer;
     };
 }

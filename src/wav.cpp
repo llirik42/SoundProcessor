@@ -3,7 +3,11 @@
 #include "utils.h"
 #include "wav.h"
 
-const unsigned int MSECONDS_IN_SECOND = 1000;
+constexpr size_t MILLISECONDS_IN_SECOND = 1000;
+
+constexpr size_t WAV_READER_BUFFER_SIZE = 1024;
+
+constexpr size_t WAV_WRITER_BUFFER_SIZE = 1024;
 
 #pragma pack(push, 1)
 struct RIFFChunk{ // RIFF
@@ -151,185 +155,160 @@ WAVManagement::WAVInfo WAVManagement::WAVParser::parse(std::string_view file_pat
     }
 
     return WAVInfo{
-        samples_count * MSECONDS_IN_SECOND / WAVFormatInfo::SUPPORTED_SAMPLE_RATE,
+            samples_count * MILLISECONDS_IN_SECOND / WAVFormatInfo::SUPPORTED_SAMPLE_RATE,
         samples_count,
         data_start_position
     };
 }
 
-/*
-    wav_file.clear();
-
-    wav_file.seekg(0);
-
-    _pimpl = new Impl{
-            std::move(wav_file),
-            samples_count / WAVFormatInfo::SUPPORTED_SAMPLE_RATE,
-            samples_count,
-            {},
-            0,
-            0
-    };
-
-    _pimpl->read_to_buffer();
-
-
-
-    return WAVInfo{};*/
-
-
-/*
-const size_t BUFFER_SIZE = 1024; // In samples (not in bytes)
-
-
-
-struct WavManagement::WAVFile::Impl{
-    std::ifstream file;
-
-    size_t duration_s;
-
-    size_t samples_count; //TODO
-
-    WAVFormatInfo::Sample buffer[BUFFER_SIZE];
+struct WAVManagement::WAVReader::Impl{
+    WAVFormatInfo::Sample buffer[WAV_READER_BUFFER_SIZE];
 
     size_t index_in_buffer;
 
-    size_t read_count;
+    size_t read_samples_count;
 
-    void read_to_buffer();
+    std::ifstream ifstream;
 
-    WAVFormatInfo::Sample get_current_element();
+    void read();
 
     void move();
 
-    bool are_elements_available() const;
+    bool available() const;
+
+    [[nodiscard]] WAVFormatInfo::Sample get_sample();
 };
 
-void WAVFile::Impl::read_to_buffer(){
-    file.read(reinterpret_cast<char*>(&buffer), sizeof(buffer));
-    read_count = static_cast<size_t>(file.gcount());
-}
+void WAVManagement::WAVReader::Impl::move(){
+    index_in_buffer++;
 
-WAVFormatInfo::Sample WAVFile::Impl::get_current_element(){
-    return buffer[index_in_buffer];
-}
-
-void WAVFile::Impl::move(){
-    if (index_in_buffer == read_count){
-        index_in_buffer = 0;
-        read_to_buffer();
+    if (index_in_buffer == WAV_READER_BUFFER_SIZE){
+        read();
     }
 }
 
-bool WAVFile::Impl::are_elements_available() const{
-    return read_count > index_in_buffer;
+bool WAVManagement::WAVReader::Impl::available() const{
+    return read_samples_count > index_in_buffer;
 }
 
+WAVFormatInfo::Sample WAVManagement::WAVReader::Impl::get_sample(){
+    WAVFormatInfo::Sample result = buffer[index_in_buffer];
 
-
-WAVFile::WAVFile(const std::string& file_path){
-    fpos_t data_start_position;
-    size_t samples_count;
-
-    std::ifstream wav_file(file_path, std::ios::binary);
-
-    if (!wav_file.is_open() || is_file_empty(wav_file)){
-        throw Exceptions::IncorrectWavError();
-    }
-
-    bool met_riff = false;
-    bool met_fmt = false;
-    bool met_data = false;
-    bool met_extra_data = false;
-
-    uint32_t current_id;
-    while (wav_file.read(reinterpret_cast<char*>(&current_id), WAVFormatInfo::ID_SIZE) && wav_file){
-        const bool incorrect_order_of_chunks = current_id != WAVFormatInfo::RIFF_ID && !met_riff;
-        if (incorrect_order_of_chunks){
-            throw Exceptions::IncorrectWavError();
-        }
-
-        const bool separated_chunks = (current_id == WAVFormatInfo::RIFF_ID && met_riff) ||
-                                      (current_id == WAVFormatInfo::FMT_ID && met_fmt) ||
-                                      (current_id == WAVFormatInfo::DATA_ID && met_data) ||
-                                      (current_id == WAVFormatInfo::LIST_ID && met_extra_data);
-
-        if (separated_chunks){
-            throw Exceptions::IncorrectWavError();
-        }
-
-        switch (current_id){
-            case WAVFormatInfo::RIFF_ID:
-                met_riff = true;
-                read_riff_chunk(wav_file);
-                break;
-            case WAVFormatInfo::FMT_ID:
-                met_fmt = true;
-                read_fmt_subchunk(wav_file);
-                break;
-            case WAVFormatInfo::LIST_ID:
-                met_extra_data = true;
-                read_extra_data_subchunk(wav_file);
-                break;
-            case WAVFormatInfo::DATA_ID:
-                met_data = true;
-                read_data_subchunk(wav_file, data_start_position, samples_count);
-                break;
-            default:
-                throw Exceptions::IncorrectWavError();
-        }
-    }
-
-    // Error occurred while reading file
-    if (!wav_file.eof()){
-        throw Exceptions::IncorrectWavError();
-    }
-
-    wav_file.clear();
-
-    wav_file.seekg(0);
-
-    _pimpl = new Impl{
-            std::move(wav_file),
-            samples_count / WAVFormatInfo::SUPPORTED_SAMPLE_RATE,
-            samples_count,
-            {},
-            0,
-            0
-    };
-
-    _pimpl->read_to_buffer();
-}
-
-size_t WAVFile::get_duration_s() const{
-    return _pimpl->duration_s;
-}
-
-WAVFile::~WAVFile(){
-    delete _pimpl;
-}
-
-struct InputStream::Impl{
-    WAVFile& wav_file;
-};
-
-InputStream::InputStream(WAVFile& wav_file){
-    _pimpl = new Impl{wav_file};
-}
-
-WAVInfo::Sample InputStream::get_element(){
-    WAVInfo::Sample result = _pimpl->wav_file._pimpl->get_current_element();
-
-    _pimpl->wav_file._pimpl->move();
+    move();
 
     return result;
 }
 
-bool InputStream::available() const{
-    return _pimpl->wav_file._pimpl->are_elements_available();
+void WAVManagement::WAVReader::Impl::read(){
+    ifstream.read(
+            reinterpret_cast<char*>(&buffer),
+            static_cast<std::streamsize>(WAV_READER_BUFFER_SIZE * sizeof(WAVFormatInfo::Sample))
+            );
+
+    read_samples_count = static_cast<size_t>(ifstream.gcount());
 }
 
-InputStream::~InputStream(){
+WAVManagement::WAVReader::WAVReader(std::string_view file_path){
+    _pimpl = new Impl{
+            {},
+            0,
+            0,
+            std::ifstream(file_path.data(), std::fstream::binary),
+    };
+
+    _pimpl->read();
+}
+
+WAVFormatInfo::Sample WAVManagement::WAVReader::get_sample(){
+    return _pimpl->get_sample();
+}
+
+bool WAVManagement::WAVReader::available() const{
+    return _pimpl->available();
+}
+
+WAVManagement::WAVReader::~WAVReader(){
     delete _pimpl;
 }
-*/
+
+struct WAVManagement::WARWriter::Impl{
+    WAVFormatInfo::Sample buffer[WAV_WRITER_BUFFER_SIZE];
+
+    size_t index_in_buffer;
+
+    size_t elements_in_buffer_count;
+
+    std::ofstream ofstream;
+
+    void dump_buffer();
+
+    void write_sample(WAVFormatInfo::Sample sample);
+
+    void write_default_wav_header(size_t samples_count);
+};
+
+void WAVManagement::WARWriter::Impl::dump_buffer(){
+    ofstream.write(
+            reinterpret_cast<char*>(&buffer),
+            static_cast<std::streamsize>(elements_in_buffer_count * sizeof(WAVFormatInfo::Sample))
+            );
+}
+
+void WAVManagement::WARWriter::Impl::write_sample(WAVFormatInfo::Sample sample){
+    buffer[index_in_buffer] = sample;
+
+    index_in_buffer++;
+    elements_in_buffer_count++;
+
+    if (index_in_buffer == WAV_WRITER_BUFFER_SIZE){
+        dump_buffer();
+    }
+}
+
+template<typename T>
+void write_value(std::ofstream& file, T value){
+    file.write(reinterpret_cast<char*>(&value), sizeof(value));
+}
+
+void WAVManagement::WARWriter::Impl::write_default_wav_header(size_t samples_count){
+    static const size_t size_of_min_headers = 44;
+
+    auto file_size = static_cast<uint32_t>(samples_count * WAVFormatInfo::SUPPORTED_BLOCK_ALIGN + size_of_min_headers - 8);
+
+    write_value(ofstream, WAVFormatInfo::RIFF_ID);
+    write_value(ofstream, file_size);
+    write_value(ofstream, WAVFormatInfo::SUPPORTED_RIFF_FORMAT);
+
+    write_value(ofstream, WAVFormatInfo::FMT_ID);
+    write_value(ofstream, WAVFormatInfo::SUPPORTED_FMT_SUBCHUNK_SIZE);
+    write_value(ofstream, WAVFormatInfo::SUPPORTED_FMT_AUDIO_FORMAT);
+    write_value(ofstream, WAVFormatInfo::SUPPORTED_NUMBER_OF_CHANNELS);
+    write_value(ofstream, WAVFormatInfo::SUPPORTED_SAMPLE_RATE);
+    write_value(ofstream, WAVFormatInfo::SUPPORTED_BYTE_RATE);
+    write_value(ofstream, WAVFormatInfo::SUPPORTED_BLOCK_ALIGN);
+    write_value(ofstream, WAVFormatInfo::SUPPORTED_BITS_PER_SAMPLE);
+
+    write_value(ofstream, WAVFormatInfo::DATA_ID);
+    write_value(ofstream, static_cast<uint32_t>(samples_count * 2));
+}
+
+WAVManagement::WARWriter::WARWriter(std::string_view file_path, size_t samples_count){
+    _pimpl = new Impl{
+            {},
+            0,
+            0,
+            std::ofstream(file_path.data(), std::fstream::binary)
+    };
+
+    _pimpl->write_default_wav_header(samples_count);
+}
+
+void WAVManagement::WARWriter::write_sample(WAVFormatInfo::Sample sample){
+    _pimpl->write_sample(sample);
+}
+
+WAVManagement::WARWriter::~WARWriter(){
+    _pimpl->dump_buffer();
+
+    delete _pimpl;
+}

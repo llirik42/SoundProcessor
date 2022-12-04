@@ -1,33 +1,17 @@
 #include "streams.h"
 
-struct Streams::InputStream::Impl{
-
-};
-
-Streams::InputStream::InputStream(WAVManagement::WAVReader& reader){
-
-}
+Streams::InputStream::InputStream(WAVManagement::WAVReader& reader): _reader(reader) {}
 
 WAVFormatInfo::Sample Streams::InputStream::get_element(){
-    return 0;
+    return _reader.get_sample();
 }
 
 bool Streams::InputStream::available() const{
-    return false;
+    return _reader.available();
 }
 
-struct Streams::OutputStream::Impl{
+Streams::OutputStream::OutputStream(WAVManagement::WARWriter& writer): _writer(writer) {}
 
-};
-
-Streams::InputStream::~InputStream(){
-    delete _pimpl;
-}
-
-Streams::OutputStream::OutputStream(WAVManagement::WARWriter& writer){
-
-}
-
-Streams::OutputStream::~OutputStream(){
-    delete _pimpl;
+void Streams::OutputStream::write(WAVFormatInfo::Sample sample){
+    _writer.write_sample(sample);
 }
