@@ -41,7 +41,7 @@ void read_riff_chunk(std::ifstream& wav_file){
 
     wav_file.read(reinterpret_cast<char*>(&riff_chunk), sizeof(riff_chunk));
 
-    size_t file_size = get_file_size(wav_file);
+    size_t file_size = Utils::get_file_size(wav_file);
 
     validate_riff_chunk(riff_chunk, file_size);
 }
@@ -102,7 +102,7 @@ WAVManagement::WAVInfo WAVManagement::WAVParser::parse(std::string_view file_pat
 
     std::ifstream wav_file(file_path.data(), std::ios::binary);
 
-    if (!wav_file.is_open() || is_file_empty(wav_file)){
+    if (!wav_file.is_open() || Utils::is_file_empty(wav_file)){
         throw Exceptions::IncorrectWavError();
     }
 

@@ -14,7 +14,19 @@ struct ConvertersFactory::Impl{
     std::map<std::string_view, CommandInfo> commands_full_info;
 
     CommandsDescription commands_description;
+
+    Converter find_converter_by_command_name(std::string_view command_name);
 };
+
+Converter ConvertersFactory::Impl::find_converter_by_command_name(std::string_view command_name){
+    for (const auto& [current_command, info] : commands_full_info){
+        if (current_command == command_name){
+            return info.converter_creation();
+        }
+    }
+
+    throw Exceptions::UnknownCommandError();
+}
 
 template<typename T>
 Converter create(){
@@ -71,8 +83,14 @@ ConvertersFactory::ConvertersFactory(){
     }
 }
 
-Converter ConvertersFactory::create_converter(const std::string_view& command_name) const{
-    return create<RawMixConverter>();
+const Converter& ConvertersFactory::create_converter(std::string_view command_name) const{
+    static std::map<std::string_view, Converter> converters;
+
+    if (!Utils::contains(converters, command_name)){
+        converters[command_name] = _pimpl->find_converter_by_command_name(command_name);
+    }
+
+    return converters.at(command_name);
 }
 
 const CommandsDescription& ConvertersFactory::get_commands_description() const{

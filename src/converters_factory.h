@@ -13,7 +13,7 @@ class ConvertersFactory{
 public:
     ConvertersFactory();
 
-    [[nodiscard]] Converter create_converter(const std::string_view& command_name) const;
+    [[nodiscard]] const Converter& create_converter(std::string_view command_name) const;
 
     [[nodiscard]] const CommandsDescription& get_commands_description() const;
 
