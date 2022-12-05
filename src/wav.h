@@ -50,7 +50,6 @@ namespace WAVManagement{
         [[nodiscard]] bool available() const;
 
         ~WAVReader();
-
     private:
         struct Impl;
         Impl* _pimpl;
@@ -63,7 +62,6 @@ namespace WAVManagement{
         void write_sample(WAVFormatInfo::Sample sample);
 
         ~WAVWriter();
-
     private:
         struct Impl;
         Impl* _pimpl;
