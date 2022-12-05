@@ -80,7 +80,7 @@ void read_extra_data_subchunk(std::ifstream& wav_file){
 
     delete[] buffer;
 }
-void read_data_subchunk(std::ifstream& wav_file, fpos_t& data_start_position, size_t& samples_count){
+void read_data_subchunk(std::ifstream& wav_file, std::fstream::pos_type& data_start_position, size_t& samples_count){
     uint32_t data_subchunk_samples_count;
 
     wav_file.read(reinterpret_cast<char*>(&data_subchunk_samples_count), sizeof(data_subchunk_samples_count));
@@ -97,7 +97,7 @@ void read_data_subchunk(std::ifstream& wav_file, fpos_t& data_start_position, si
 }
 
 WAVManagement::WAVInfo WAVManagement::parse_wav(std::string_view file_path){
-    fpos_t data_start_position;
+    std::fstream::pos_type data_start_position;
     size_t samples_count;
 
     std::ifstream wav_file(file_path.data(), std::ios::binary);
