@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <string>
+#include <fstream>
 
 namespace WAVFormatInfo{
     using Sample = int16_t;
@@ -28,7 +29,7 @@ namespace WAVManagement{
     struct WAVInfo{
         float duration_s;
         size_t samples_count;
-        fpos_t data_start_position;
+        std::fstream::pos_type data_start_position;
     };
 
     WAVInfo parse_wav(std::string_view file_path);
