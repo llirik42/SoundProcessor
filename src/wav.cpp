@@ -96,7 +96,7 @@ void read_data_subchunk(std::ifstream& wav_file, fpos_t& data_start_position, si
     }
 }
 
-WAVManagement::WAVInfo WAVManagement::WAVParser::parse(std::string_view file_path){
+WAVManagement::WAVInfo WAVManagement::parse_wav(std::string_view file_path){
     fpos_t data_start_position;
     size_t samples_count;
 
@@ -221,9 +221,7 @@ void WAVManagement::WAVReader::Impl::read(){
 }
 
 WAVManagement::WAVReader::WAVReader(std::string_view file_path){
-    static WAVManagement::WAVParser parser;
-
-    WAVManagement::WAVInfo info = parser.parse(file_path);
+    WAVManagement::WAVInfo info = WAVManagement::parse_wav(file_path);
 
     _pimpl = new Impl{{},
                       0,

@@ -31,10 +31,7 @@ namespace WAVManagement{
         fpos_t data_start_position;
     };
 
-    class WAVParser{
-    public:
-        static WAVInfo parse(std::string_view file_path);
-    };
+    WAVInfo parse_wav(std::string_view file_path);
 
     class WAVReader{
     public:

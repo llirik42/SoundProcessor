@@ -70,7 +70,7 @@ Processing::Processor::Processor(const std::string_view& config,
                                  const Factory::ConvertersFactory& factory){
 
     // For validation
-    WAVManagement::WAVParser::parse(in);
+    WAVManagement::parse_wav(in);
 
     _pimpl = new Impl{out,
                       in,
