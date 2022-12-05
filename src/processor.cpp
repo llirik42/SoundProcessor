@@ -30,30 +30,32 @@ Converters::ConverterParams Processing::Processor::Impl::create_params(const std
                 auto index = Utils::string_to_positive_number(current_arg.data() + 1);
 
                 if (index == 0 || index > additional_streams.size()){
-                    throw Exceptions::IncorrectCommandsParams();
+                    throw Exceptions::IncorrectCommandParams();
                 }
 
                 result.push_back(&additional_streams[index - 1]);
             }
             // errors of conversion
             catch(const std::runtime_error&){
-                throw Exceptions::IncorrectCommandsParams();
+                throw Exceptions::IncorrectCommandParams();
             }
         }
         else{
             if (current_arg == Processing::LEFT_ARROW){
                 result.push_back(Processing::LEFT_TIME_ARROW_ALIAS);
+                continue;
             }
-            else if (current_arg == Processing::RIGHT_ARROW){
+
+            if (current_arg == Processing::RIGHT_ARROW){
                 result.push_back(Processing::RIGHT_TIME_ARROW_ALIAS);
+                continue;
             }
-            else{
-                try{
-                    result.push_back(std::stof(current_arg));
-                }
-                catch(...){
-                    throw Exceptions::IncorrectCommandsParams();
-                }
+
+            try{
+                result.push_back(std::stof(current_arg));
+            }
+            catch(...){
+                throw Exceptions::IncorrectCommandParams();
             }
         }
     }

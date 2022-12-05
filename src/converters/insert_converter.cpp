@@ -30,7 +30,7 @@ void RawInsertConverter::convert(std::string_view command,
                                  const Converters::ConverterParams& params) const{
 
     if ((command == "insert" && params.size() != 4) || ((command == "front" || command == "back") && params.size() != 3)){
-        throw Exceptions::IncorrectCommandsParams();
+        throw Exceptions::IncorrectCommandParams();
     }
 
     auto& additional_stream = *convert_any<Streams::InputStream*>(params[0]);

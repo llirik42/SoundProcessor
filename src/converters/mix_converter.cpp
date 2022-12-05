@@ -39,7 +39,7 @@ void RawMixConverter::convert([[maybe_unused]] std::string_view command,
                               const Converters::ConverterParams& params) const{
 
     if (params.size() != 4 && params.size() != 5){
-        throw Exceptions::IncorrectCommandsParams();
+        throw Exceptions::IncorrectCommandParams();
     }
 
     auto& additional_stream = *convert_any<Streams::InputStream*>(params[0]);

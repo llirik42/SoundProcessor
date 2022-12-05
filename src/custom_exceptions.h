@@ -38,7 +38,7 @@ namespace Exceptions{
         [[nodiscard]] int code() const noexcept override {return UNKNOWN_COMMAND_ERROR_CODE;}
     };
 
-    class IncorrectCommandsParams : public AbstractException{
+    class IncorrectCommandParams :public AbstractException{
     public:
         [[nodiscard]] const char* what() const noexcept override {return "Incorrect params for command(s)";}
         [[nodiscard]] int code() const noexcept override {return INCORRECT_COMMANDS_PARAMS_ERROR_CODE;}

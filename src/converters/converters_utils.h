@@ -10,7 +10,7 @@ T convert_any(std::any any){
         return std::any_cast<T>(any);
     }
     catch(...){
-        throw Exceptions::IncorrectCommandsParams();
+        throw Exceptions::IncorrectCommandParams();
     }
 }
 

@@ -19,6 +19,6 @@ size_t calculate_sample_index_by_time(float time, Streams::InputStream& input_st
 
 void check_time_fragment(size_t start_sample, size_t end_sample, Streams::InputStream& input_stream){
     if (end_sample < start_sample || end_sample > input_stream.get_size()){
-        throw Exceptions::IncorrectCommandsParams();
+        throw Exceptions::IncorrectCommandParams();
     }
 }

@@ -29,7 +29,7 @@ void RawVolumeConverter::convert(std::string_view command,
                                  const Converters::ConverterParams& params) const{
 
     if ((command == "mute" && params.size() != 2) || (command == "volume" && params.size() != 3)){
-        throw Exceptions::IncorrectCommandsParams();
+        throw Exceptions::IncorrectCommandParams();
     }
 
     size_t start_time_index = command == "mute" ? 0 : 1;

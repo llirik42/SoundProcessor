@@ -24,7 +24,7 @@ void RawCutConverter::convert([[maybe_unused]] std::string_view command,
                               const Converters::ConverterParams& params) const{
 
     if (params.size() != 2){
-        throw Exceptions::IncorrectCommandsParams();
+        throw Exceptions::IncorrectCommandParams();
     }
 
     auto start_sample = calculate_sample_index_by_time(
