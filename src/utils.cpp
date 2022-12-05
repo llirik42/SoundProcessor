@@ -4,7 +4,8 @@
 
 static const size_t COPYING_BUFFER_SIZE = 1024;
 
-char digit_to_char(unsigned int digit){
+template<typename T>
+char digit_to_char(T digit){
     return static_cast<char>(digit + '0');
 }
 
